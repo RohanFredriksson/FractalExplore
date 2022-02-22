@@ -19,7 +19,7 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
-    while(true) {
+    while(!glfwWindowShouldClose(window)) {
         glfwPollEvents(); // Updating OpenGL window
         glfwSwapBuffers(window); // Rendering OpenGL window
     }
