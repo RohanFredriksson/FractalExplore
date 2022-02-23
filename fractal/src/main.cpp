@@ -1,7 +1,7 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 
-#include "../include/math.h"
+#include "math.h"
 
 int main() {
 
