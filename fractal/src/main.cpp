@@ -1,7 +1,11 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 
+#include "../include/math.h"
+
 int main() {
+
+    printf("%d\n", add(1, 2));
 
     GLFWwindow *window; //Pointer tothe GLFW window Object
 
