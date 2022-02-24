@@ -1,23 +1,23 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 
-#include "math.h"
+#include "fractal.h"
 
 int main() {
 
-    printf("%d\n", add(1, 2));
+    printf("%f\n", mandelbrot(0.0f, 0.0f, 1));
 
     GLFWwindow *window; //Pointer tothe GLFW window Object
 
     if(!glfwInit()) { // Initialize GLFW
-        std::cout << "GLFW Not Initialized" << std::endl;
+        printf("GLFW Not Initialized\n");
         return -1;
     }
 
     window = glfwCreateWindow(800, 450, "FractalGenerator", 0, 0); // Creating window
 
     if(!window) { // Check whether window was successfully created
-        std::cout << "Window wasnt created" << std::endl;
+        printf("Window could not be created\n");
         return -1;
     }
 

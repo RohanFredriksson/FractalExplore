@@ -2,13 +2,14 @@ cmake_minimum_required(VERSION 3.14)
 
 project(FractalExplore)
 
-add_subdirectory(fractal/dependencies/glfw/)
+add_subdirectory(dependencies/glfw/)
+include_directories(include)
 
-set(SOURCE_DIR fractal/src)
+set(SOURCE_DIR src)
 set(SOURCE
     ${SOURCE}
     ${SOURCE_DIR}/main.cpp
-    ${SOURCE_DIR}/math.cpp
+    ${SOURCE_DIR}/fractal.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
