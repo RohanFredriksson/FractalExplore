@@ -5,7 +5,7 @@
 
 int main() {
 
-    printf("%f\n", mandelbrot(0.0f, 0.0f, 1));
+    printf("%f\n", mandelbrot(0, 0, 255));
 
     GLFWwindow *window; //Pointer tothe GLFW window Object
 

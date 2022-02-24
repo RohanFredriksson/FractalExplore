@@ -1,3 +1,3 @@
 #pragma once
 
-float mandelbrot(float x, float y, int iterations);
+double mandelbrot(double x, double y, int iterations);
