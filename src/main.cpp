@@ -1,4 +1,6 @@
 #include <iostream>
+#include <windows.h>
+#include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "fractal.h"
@@ -7,7 +9,7 @@ int main() {
 
     printf("%f\n", mandelbrot(0, 0, 255));
 
-    GLFWwindow *window; //Pointer tothe GLFW window Object
+    GLFWwindow *window; //Pointer to the GLFW window Object
 
     if(!glfwInit()) { // Initialize GLFW
         printf("GLFW Not Initialized\n");
