@@ -48,7 +48,7 @@ class Shader {
             }
 
             catch (std::ifstream::failure e) {
-                printf("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ\n");
+                std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ\n";
             }
 
             this->vertexCode = vertexSource.c_str();
