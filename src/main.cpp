@@ -5,9 +5,16 @@
 #include <math.h>
 
 #include "shader.hpp"
+#include "window.hpp"
 
 int main() {
 
+	Window* w = Window::get();
+	printf("%d\n", w->getWidth());
+
+	Window::get();
+
+	/*
 	// Initialize GLFW
 	glfwInit();
 
@@ -127,5 +134,7 @@ int main() {
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program
 	glfwTerminate();
+	*/
+
 	return 0;
 }
