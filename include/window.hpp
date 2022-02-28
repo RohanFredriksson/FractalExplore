@@ -1,10 +1,7 @@
 #pragma once
 
-#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <math.h>
 
 class Window {
 
@@ -22,10 +19,7 @@ class Window {
 
         static Window* get() {
 
-            printf("GET\n");
-
             if (Window::window == NULL) {
-                printf("INIT\n");
                 Window::window = new Window;
             }
 
