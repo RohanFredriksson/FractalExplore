@@ -11,8 +11,9 @@ include_directories(include)
 set(SOURCE_DIR src)
 set(SOURCE
     ${SOURCE}
-    ${SOURCE_DIR}/main.cpp
-    ${SOURCE_DIR}/fractal.cpp
+    src/main.cpp
+    src/shader.cpp
+    src/fractal.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
