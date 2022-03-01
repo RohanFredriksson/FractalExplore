@@ -12,6 +12,7 @@ set(SOURCE_DIR src)
 set(SOURCE
     ${SOURCE}
     src/main.cpp
+    src/window.cpp
     src/shader.cpp
     src/fractal.cpp
 )

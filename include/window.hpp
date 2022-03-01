@@ -1,36 +1,28 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 class Window {
 
     private:
 
+        // Variables
         static Window* window;
         GLFWwindow* glfwWindow;
-        
-        int width   = 1920;
-        int height  = 1080;
-        //char* title = "FractalExplore";
-        float fps   = -1.0f;
+        int width;
+        int height;
+        float fps;
 
     public:
 
-        static Window* get() {
+        Window();
 
-            if (Window::window == NULL) {
-                Window::window = new Window;
-            }
+        // Static Methods
+        static Window* get();
 
-            return Window::window;
-
-        }
-
-        int getWidth() {
-            return this->width;
-        }
+        // Instance Methods
+        void init();
+        void loop();
+        void exit();
 
 };
-
-Window* Window::window = NULL;
