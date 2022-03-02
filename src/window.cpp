@@ -163,4 +163,28 @@ void Window::run() {
 	
 }
 
+int Window::getWidth() {
+	return Window::get()->width;
+}
+
+int Window::getHeight() {
+	return Window::get()->height;
+}
+
+void Window::setWidth(int w) {
+	Window::get()->width = w;
+}
+
+void Window::setHeight(int h) {
+	Window::get()->height = h;
+}
+
+float Window::getAspectRatio() {
+	return (float) Window::getWidth() / (float) Window::getHeight();
+}
+
+float Window::getFPS() {
+	return Window::get()->fps;
+}
+
 Window* Window::window = NULL;

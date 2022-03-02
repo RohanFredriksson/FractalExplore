@@ -19,7 +19,14 @@ class Window {
     public:
 
         Window();
+        void run();
+
         static Window* get();
-        void run();    
+        static int getWidth();
+        static int getHeight();
+        static void setWidth(int w);
+        static void setHeight(int h);
+        static float getAspectRatio();
+        static float getFPS();
 
 };
