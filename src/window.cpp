@@ -155,4 +155,12 @@ void Window::exit() {
 
 }
 
+void Window::run() {
+
+	this->init();
+	this->loop();
+	this->exit();
+	
+}
+
 Window* Window::window = NULL;

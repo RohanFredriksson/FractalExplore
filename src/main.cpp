@@ -3,9 +3,7 @@
 int main() {
 
 	Window* window = Window::get();
-	window->init();
-	window->loop();
-	window->exit();
+	window->run();
 
 	return 0;
 }
