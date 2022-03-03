@@ -14,6 +14,7 @@ set(SOURCE
     src/main.cpp
     src/window.cpp
     src/shader.cpp
+    src/camera.cpp
     src/fractal.cpp
 )
 
