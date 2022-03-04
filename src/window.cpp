@@ -1,8 +1,10 @@
 #include <iostream>
+#include <stdlib.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <math.h>
+
 
 #include "shader.hpp"
 #include "window.hpp"
@@ -28,21 +30,19 @@ Window* Window::get() {
 void Window::init() {
 
     // Initialize GLFW
-	glfwInit();
+	if (!glfwInit()) {
+		std::cout << "Unable to initialise GLFW." << std::endl;
+		return;
+	}
 
-	// Tell GLFW what version of OpenGL we are using 
-	// In this case we are using OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Tell GLFW we are using the CORE profile
-	// So that means we only have the modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-	this->glfwWindow = glfwCreateWindow(800, 800, "YoutubeOpenGL", NULL, NULL);
+	this->glfwWindow = glfwCreateWindow(800, 800, "Fractal Explore", NULL, NULL);
 	// Error check if the window fails to create
-	if (this->glfwWindow == NULL)
-	{
+	if (this->glfwWindow == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return;
@@ -68,20 +68,17 @@ void Window::loop() {
 	// Vertices coordinates
 	GLfloat vertices[] =
 	{
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower left corner
-		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower right corner
-		0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
-		-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-		0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
-		0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
+		-0.5f, -0.5f, 0.0f, // Lower left corner
+		0.5f , -0.5f, 0.0f, // Lower right corner
+		0.5f ,  0.5f, 0.0f, // Upper right corner
+		-0.5f,  0.5f, 0.0f, // Upper left corner
 	};
 
 	// Indices for vertices order
 	GLuint indices[] =
 	{
-		0, 3, 5, // Lower left triangle
-		3, 2, 4, // Lower right triangle
-		5, 4, 1 // Upper triangle
+		0, 3, 1,
+		1, 3, 2,
 	};
 
 	// Create reference containers for the Vartex Array Object, the Vertex Buffer Object, and the Element Buffer Object

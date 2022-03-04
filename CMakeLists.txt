@@ -15,7 +15,6 @@ set(SOURCE
     src/window.cpp
     src/shader.cpp
     src/camera.cpp
-    src/fractal.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
