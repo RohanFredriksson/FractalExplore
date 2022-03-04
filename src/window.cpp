@@ -60,7 +60,7 @@ void Window::init() {
 
 void Window::loop() {
 
-	Camera camera(glm::vec2(-2.0f, -2.0f));
+	Camera camera(glm::vec2(1.0f, 1.0f));
 
     const char* v = "assets/shaders/mandelbrot.vert";
 	const char* f = "assets/shaders/mandelbrot.frag";
