@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sstream>
+#include <streambuf>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -25,17 +25,13 @@ Shader::Shader(GLchar const* vertexFilepath, GLchar const* fragmentFilepath) {
         // Open the files.
         vertexFile.open(vertexFilepath);
         fragmentFile.open(fragmentFilepath);
-        std::stringstream vertexStream, fragmentStream;
 
-        // Read file's buffer into streams.
-        vertexStream << vertexFile.rdbuf();
-        fragmentStream << fragmentFile.rdbuf();
+        // Convert the file sources into strings.
+        vertexSource = std::string((std::istreambuf_iterator<char>(vertexFile)), std::istreambuf_iterator<char>());
+        fragmentSource = std::string((std::istreambuf_iterator<char>(fragmentFile)), std::istreambuf_iterator<char>());
+
         vertexFile.close();
         fragmentFile.close();
-
-        // Convert the streams into strings.
-        vertexSource = vertexStream.str();
-        fragmentSource = fragmentStream.str();
 
     }
 
