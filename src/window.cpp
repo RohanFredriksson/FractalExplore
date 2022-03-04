@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-
+#include "camera.hpp"
 #include "shader.hpp"
 #include "window.hpp"
 
@@ -60,25 +60,29 @@ void Window::init() {
 
 void Window::loop() {
 
-    const char* v = "assets/shaders/test.vert";
-	const char* f = "assets/shaders/test.frag";
+	Camera camera(glm::vec2(-2.0f, -2.0f));
+
+    const char* v = "assets/shaders/mandelbrot.vert";
+	const char* f = "assets/shaders/mandelbrot.frag";
 	Shader test(v, f);
 	test.compile();
+	test.uploadMat4("uProjection", camera.getProjection());
+	test.uploadMat4("uView", camera.getView());
 
 	// Vertices coordinates
 	GLfloat vertices[] =
 	{
-		-0.5f, -0.5f, 0.0f, // Lower left corner
-		0.5f , -0.5f, 0.0f, // Lower right corner
-		0.5f ,  0.5f, 0.0f, // Upper right corner
-		-0.5f,  0.5f, 0.0f, // Upper left corner
+		 2.0f,  2.0f, // Top Right
+		 2.0f, -2.0f, // Bottom Right
+		-2.0f, -2.0f, // Bottom Left
+		-2.0f,  2.0f, // Top Left
 	};
 
 	// Indices for vertices order
 	GLuint indices[] =
 	{
-		0, 3, 1,
-		1, 3, 2,
+		3, 2, 0,
+		0, 2, 1,
 	};
 
 	// Create reference containers for the Vartex Array Object, the Vertex Buffer Object, and the Element Buffer Object
@@ -103,7 +107,7 @@ void Window::loop() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Configure the Vertex Attribute so that OpenGL knows how to read the VBO
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	// Enable the Vertex Attribute so that OpenGL knows to use it
 	glEnableVertexAttribArray(0);
 
@@ -127,7 +131,7 @@ void Window::loop() {
 		// Bind the VAO so OpenGL knows to use it
 		glBindVertexArray(VAO);
 		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);    // CHANGE THE NUMBER OF LINES
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(this->glfwWindow);
 		// Take care of all GLFW events

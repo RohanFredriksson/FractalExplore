@@ -7,7 +7,7 @@
 Camera::Camera(glm::vec2 pos) {
 
     this->position = pos;
-    this->projectionSize = glm::vec2(1.0f, 1.0f);
+    this->projectionSize = glm::vec2(4.0f, 4.0f);
     this->projection = glm::mat4(1.0f);
     this->view = glm::mat4(1.0f);
     this->inverseProjection = glm::mat4(1.0f);
@@ -19,7 +19,7 @@ Camera::Camera(glm::vec2 pos) {
         
 void Camera::adjustProjection() {
     
-    this->projectionSize.x = this->projectionSize.y * Window::getAspectRatio();   
+    //this->projectionSize.x = this->projectionSize.y * Window::getAspectRatio();   
     this->projection = glm::ortho(0.0f, this->projectionSize.x * this->zoom, 0.0f, this->projectionSize.y * this->zoom, 0.0f, 100.0f);
     this->inverseProjection = glm::inverse(this->projection);
 
