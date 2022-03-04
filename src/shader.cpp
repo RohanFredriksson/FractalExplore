@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
 
 Shader::Shader(GLchar const* vertexFilepath, GLchar const* fragmentFilepath) {
@@ -107,3 +108,9 @@ void Shader::detach() {
 void Shader::deleteProgram() {
     glDeleteProgram(this->program);
 };
+
+void Shader::uploadMat4(const GLchar* name, const glm::mat4& mat4) {
+    GLint location = glGetUniformLocation(this->program, name);
+    this->use();
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat4));
+}

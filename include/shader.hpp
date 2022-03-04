@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class Shader {
 
@@ -18,5 +19,7 @@ class Shader {
         void use();
         void detach();
         void deleteProgram();
+
+        void uploadMat4(const GLchar* name, const glm::mat4& mat4);
 
 };
