@@ -1,5 +1,8 @@
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include "listener.hpp"
+#include "window.hpp"
 
 KeyListener::KeyListener() {
 
@@ -44,3 +47,15 @@ bool KeyListener::isBeginPress(int key) {
 }
 
 KeyListener* KeyListener::instance = NULL;
+
+void WindowResizeListener::resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
+
+    Window::setWidth(screenWidth);
+    Window::setHeight(screenHeight);
+    Window::getCamera()->adjustProjection();
+    //MouseListener::setViewportPos(0.0f, 0.0f);
+    //MouseListener::setViewportSize(screenWidth, screenHeight);
+    // Re-render the fractal as well
+    glViewport(0, 0, screenWidth, screenHeight);
+
+}

@@ -12,9 +12,11 @@
 
 Window::Window() {
 
-    this->width = 1920;
-    this->height = 1080;
+    this->width = 800;
+    this->height = 800;
     this->fps = -1.0f;
+
+	this->camera = new Camera(glm::vec2(0.0f, 0.0f));
 
 }
 
@@ -50,7 +52,8 @@ void Window::init() {
 	}
 
 	// Manage callbacks
-	glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
+	glfwSetKeyCallback(this->glfwWindow, KeyListener::keyCallback);
+	glfwSetWindowSizeCallback(this->glfwWindow, WindowResizeListener::resizeCallback);
 
 	// Make the OpenGl context current
 	glfwMakeContextCurrent(this->glfwWindow);
@@ -61,21 +64,19 @@ void Window::init() {
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
 
-
-	glViewport(0, 0, 800, 800);
+	// Call the resize callback for initialisation.
+	WindowResizeListener::resizeCallback(this->glfwWindow, 800, 800);
 
 }
 
 void Window::loop() {
 
-	Camera camera(glm::vec2(-1.0f, 0.0f));
-
     const char* v = "assets/shaders/mandelbrot.vert";
 	const char* f = "assets/shaders/mandelbrot.frag";
 	Shader test(v, f);
 	test.compile();
-	test.uploadMat4("uProjection", camera.getProjection());
-	test.uploadMat4("uView", camera.getView());
+	test.uploadMat4("uProjection", this->camera->getProjection());
+	test.uploadMat4("uView", this->camera->getView());
 
 	// Vertices coordinates
 	GLfloat vertices[] =
@@ -199,6 +200,10 @@ float Window::getAspectRatio() {
 
 float Window::getFPS() {
 	return Window::get()->fps;
+}
+
+Camera* Window::getCamera() {
+	return Window::get()->camera;
 }
 
 Window* Window::window = NULL;

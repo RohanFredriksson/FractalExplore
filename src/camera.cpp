@@ -13,13 +13,12 @@ Camera::Camera(glm::vec2 pos) {
     this->inverseProjection = glm::mat4(1.0f);
     this->inverseView = glm::mat4(1.0f);
     this->zoom = 2.0f;
-    adjustProjection();
 
 }
         
 void Camera::adjustProjection() {
     
-    //this->projectionSize.x = this->projectionSize.y * Window::getAspectRatio();   
+    this->projectionSize.x = this->projectionSize.y * Window::getAspectRatio();
     this->projection = glm::ortho(0.0f, this->projectionSize.x / this->zoom, 0.0f, this->projectionSize.y / this->zoom, 0.0f, 100.0f);
     this->inverseProjection = glm::inverse(this->projection);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include "camera.hpp"
 
 class Window {
 
@@ -8,6 +9,7 @@ class Window {
 
         static Window* window;
         GLFWwindow* glfwWindow;
+        Camera* camera;
         int width;
         int height;
         float fps;
@@ -28,5 +30,6 @@ class Window {
         static void setHeight(int h);
         static float getAspectRatio();
         static float getFPS();
+        static Camera* getCamera();
 
 };

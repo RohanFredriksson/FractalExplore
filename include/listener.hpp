@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class KeyListener {
 
@@ -17,5 +18,12 @@ class KeyListener {
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
         static bool isKeyPressed(int key);
         static bool isBeginPress(int key);
+
+};
+
+class WindowResizeListener {
+
+    public:
+        static void resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight);
 
 };
