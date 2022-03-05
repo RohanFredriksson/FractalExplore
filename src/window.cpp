@@ -8,6 +8,7 @@
 #include "camera.hpp"
 #include "shader.hpp"
 #include "window.hpp"
+#include "listener.hpp"
 
 Window::Window() {
 
@@ -29,31 +30,38 @@ Window* Window::get() {
 
 void Window::init() {
 
-    // Initialize GLFW
+    // Initialise GLFW
 	if (!glfwInit()) {
 		std::cout << "Unable to initialise GLFW." << std::endl;
 		return;
 	}
 
+	// Configure GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
+	// Create the window
 	this->glfwWindow = glfwCreateWindow(800, 800, "Fractal Explore", NULL, NULL);
-	// Error check if the window fails to create
 	if (this->glfwWindow == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return;
 	}
-	// Introduce the window into the current context
+
+	// Manage callbacks
+	glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
+
+	// Make the OpenGl context current
 	glfwMakeContextCurrent(this->glfwWindow);
+
+	//Enable v-sync
+    glfwSwapInterval(1);
 
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
-	// Specify the viewport of OpenGL in the Window
-	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
+
+
 	glViewport(0, 0, 800, 800);
 
 }
@@ -85,7 +93,7 @@ void Window::loop() {
 		0, 2, 1,
 	};
 
-	// Create reference containers for the Vartex Array Object, the Vertex Buffer Object, and the Element Buffer Object
+	// Create reference containers for the Vertex Array Object, the Vertex Buffer Object, and the Element Buffer Object
 	GLuint VAO, VBO, EBO;
 
 	// Generate the VAO, VBO, and EBO with only 1 object each
@@ -136,6 +144,11 @@ void Window::loop() {
 		glfwSwapBuffers(this->glfwWindow);
 		// Take care of all GLFW events
 		glfwPollEvents();
+
+		if (KeyListener::isKeyPressed(GLFW_KEY_A)) {
+			printf("A\n");
+		}
+
 	}
 
     // Delete all the objects we've created

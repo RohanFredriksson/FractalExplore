@@ -15,6 +15,7 @@ set(SOURCE
     src/window.cpp
     src/shader.cpp
     src/camera.cpp
+    src/listener.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
