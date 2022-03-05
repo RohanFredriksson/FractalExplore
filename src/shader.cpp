@@ -12,8 +12,6 @@
 Shader::Shader(GLchar const* vertexFilepath, GLchar const* fragmentFilepath) {
 
     // Get the vertex and fragment shader source code from their respective files.
-    std::string vertexSource;
-    std::string fragmentSource;
     std::ifstream vertexFile;
     std::ifstream fragmentFile;
 
@@ -28,8 +26,8 @@ Shader::Shader(GLchar const* vertexFilepath, GLchar const* fragmentFilepath) {
         fragmentFile.open(fragmentFilepath);
 
         // Convert the file sources into strings.
-        vertexSource = std::string((std::istreambuf_iterator<char>(vertexFile)), std::istreambuf_iterator<char>());
-        fragmentSource = std::string((std::istreambuf_iterator<char>(fragmentFile)), std::istreambuf_iterator<char>());
+        this->vertexSource = std::string((std::istreambuf_iterator<char>(vertexFile)), std::istreambuf_iterator<char>());
+        this->fragmentSource = std::string((std::istreambuf_iterator<char>(fragmentFile)), std::istreambuf_iterator<char>());
 
         vertexFile.close();
         fragmentFile.close();
@@ -40,8 +38,8 @@ Shader::Shader(GLchar const* vertexFilepath, GLchar const* fragmentFilepath) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ\n";
     }
 
-    this->vertexCode = vertexSource.c_str();
-    this->fragmentCode = fragmentSource.c_str();
+    this->vertexCode = this->vertexSource.c_str();
+    this->fragmentCode = this->fragmentSource.c_str();
 
 };
 

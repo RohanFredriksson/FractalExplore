@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -9,6 +10,8 @@ class Shader {
 
         GLuint program;
         bool beingUsed;
+        std::string vertexSource;
+        std::string fragmentSource;
         const GLchar* vertexCode;
         const GLchar* fragmentCode;
 
