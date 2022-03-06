@@ -55,6 +55,9 @@ void Window::init() {
 	// Manage callbacks
 	glfwSetKeyCallback(this->glfwWindow, KeyListener::keyCallback);
 	glfwSetWindowSizeCallback(this->glfwWindow, WindowResizeListener::resizeCallback);
+	glfwSetCursorPosCallback(this->glfwWindow, MouseListener::mousePosCallback);
+	glfwSetMouseButtonCallback(this->glfwWindow, MouseListener::mouseButtonCallback);
+	glfwSetScrollCallback(this->glfwWindow, MouseListener::mouseScrollCallback);
 
 	// Make the OpenGl context current
 	glfwMakeContextCurrent(this->glfwWindow);
@@ -89,7 +92,7 @@ void Window::loop() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		renderer.render();
-
+		MouseListener::endFrame();
 		glfwSwapBuffers(this->glfwWindow);
 
 	}
