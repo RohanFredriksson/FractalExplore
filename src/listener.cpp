@@ -190,7 +190,7 @@ void MouseListener::calcOrthoX() {
     currentX = (currentX / MouseListener::get()->viewportSize.x) * 2.0f - 1.0f;
     glm::vec4 tmp(currentX, 0, 0, 1);
     glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
-    tmp = tmp * viewProjection;
+    tmp = viewProjection * tmp;
 
     MouseListener::get()->worldX = tmp.x;
 
@@ -202,7 +202,7 @@ void MouseListener::calcOrthoY() {
     currentY = (currentY / MouseListener::get()->viewportSize.y) * 2.0f - 1.0f;
     glm::vec4 tmp(0, currentY, 0, 1);
     glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
-    tmp = tmp * viewProjection;
+    tmp = viewProjection * tmp;
 
     MouseListener::get()->worldY = tmp.y;
 
