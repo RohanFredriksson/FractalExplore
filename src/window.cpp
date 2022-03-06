@@ -9,6 +9,7 @@
 #include "shader.hpp"
 #include "window.hpp"
 #include "listener.hpp"
+#include "fractalrenderer.hpp"
 
 Window::Window() {
 
@@ -73,91 +74,27 @@ void Window::loop() {
 
     const char* v = "assets/shaders/mandelbrot.vert";
 	const char* f = "assets/shaders/mandelbrot.frag";
-	Shader test(v, f);
-	test.compile();
-	test.uploadMat4("uProjection", this->camera->getProjection());
-	test.uploadMat4("uView", this->camera->getView());
+	Shader mandelbrot(v, f);
+	mandelbrot.compile();
 
-	// Vertices coordinates
-	GLfloat vertices[] =
-	{
-		 2.0f,  2.0f, // Top Right
-		 2.0f, -2.0f, // Bottom Right
-		-2.0f, -2.0f, // Bottom Left
-		-2.0f,  2.0f, // Top Left
-	};
-
-	// Indices for vertices order
-	GLuint indices[] =
-	{
-		3, 2, 0,
-		0, 2, 1,
-	};
-
-	// Create reference containers for the Vertex Array Object, the Vertex Buffer Object, and the Element Buffer Object
-	GLuint VAO, VBO, EBO;
-
-	// Generate the VAO, VBO, and EBO with only 1 object each
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	// Make the VAO the current Vertex Array Object by binding it
-	glBindVertexArray(VAO);
-
-	// Bind the VBO specifying it's a GL_ARRAY_BUFFER
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Introduce the vertices into the VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// Bind the EBO specifying it's a GL_ELEMENT_ARRAY_BUFFER
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	// Introduce the indices into the EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	// Configure the Vertex Attribute so that OpenGL knows how to read the VBO
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	// Enable the Vertex Attribute so that OpenGL knows to use it
-	glEnableVertexAttribArray(0);
-
-	// Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	// Bind the EBO to 0 so that we don't accidentally modify it
-	// MAKE SURE TO UNBIND IT AFTER UNBINDING THE VAO, as the EBO is linked in the VAO
-	// This does not apply to the VBO because the VBO is already linked to the VAO during glVertexAttribPointer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	FractalRenderer renderer(&mandelbrot);
+	renderer.start();
 
 	// Main while loop
-	while (!glfwWindowShouldClose(this->glfwWindow))
-	{
-		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT);
-		// Tell OpenGL which Shader Program we want to use
-		test.use();
-		// Bind the VAO so OpenGL knows to use it
-		glBindVertexArray(VAO);
-		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);    // CHANGE THE NUMBER OF LINES
-		// Swap the back buffer with the front buffer
-		glfwSwapBuffers(this->glfwWindow);
-		// Take care of all GLFW events
+	while (!glfwWindowShouldClose(this->glfwWindow)) {	
+
 		glfwPollEvents();
 
-		if (KeyListener::isKeyPressed(GLFW_KEY_A)) {
-			printf("A\n");
-		}
+		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		renderer.render();
+
+		glfwSwapBuffers(this->glfwWindow);
 
 	}
 
-    // Delete all the objects we've created
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-
-    test.deleteProgram();
+    mandelbrot.deleteProgram();
     
 }
 

@@ -16,6 +16,7 @@ set(SOURCE
     src/shader.cpp
     src/camera.cpp
     src/listener.cpp
+    src/fractalrenderer.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
