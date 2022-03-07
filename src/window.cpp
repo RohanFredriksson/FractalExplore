@@ -96,8 +96,6 @@ void Window::loop() {
 			this->camera->position.y = this->camera->position.y - (MouseListener::getWorldDy());
 		}
 
-		printf("Camera: %f, Cursor: %f, Distance: %f\n", this->camera->position.x, MouseListener::getOrthoX(), (MouseListener::getOrthoX() - this->camera->position.x));
-
 		if (MouseListener::getScrollY() != 0.0f) {
 
 			if (MouseListener::getScrollY() > 0) {
@@ -108,6 +106,8 @@ void Window::loop() {
 
 			else {
 				this->camera->setZoom(this->camera->getZoom() / 1.1f);
+				this->camera->position.x = this->camera->position.x - (MouseListener::getOrthoX() - this->camera->position.x) * 0.1f;
+				this->camera->position.y = this->camera->position.y + (MouseListener::getOrthoY() - this->camera->position.y) * 0.1f;
 			}
 
 			this->camera->adjustProjection();
