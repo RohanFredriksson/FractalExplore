@@ -92,8 +92,8 @@ void Window::loop() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		if (MouseListener::isDragging()) {
-			this->camera->position.x = this->camera->position.x + (MouseListener::getWorldDx());
-			this->camera->position.y = this->camera->position.y - (MouseListener::getWorldDy());
+			if (MouseListener::getDx() != 0) {this->camera->position.x = this->camera->position.x + (MouseListener::getWorldDx());}
+			if (MouseListener::getDy() != 0) {this->camera->position.y = this->camera->position.y - (MouseListener::getWorldDy());}
 		}
 
 		if (MouseListener::getScrollY() != 0.0f) {
