@@ -17,7 +17,7 @@ Window::Window() {
     this->height = 800;
     this->fps = -1.0f;
 
-	this->camera = new Camera(glm::vec2(0.0f, 0.0f));
+	this->camera = new Camera(glm::vec2(-0.75f, 0.0f));
 
 }
 

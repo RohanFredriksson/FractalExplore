@@ -7,12 +7,12 @@
 Camera::Camera(glm::vec2 pos) {
 
     this->position = pos;
-    this->projectionSize = glm::vec2(5.0f, 5.0f);
+    this->projectionSize = glm::vec2(3.0f, 3.0f);
     this->projection = glm::mat4(1.0f);
     this->view = glm::mat4(1.0f);
     this->inverseProjection = glm::mat4(1.0f);
     this->inverseView = glm::mat4(1.0f);
-    this->zoom = 5.0f;
+    this->zoom = 1.0f;
 
 }
         
