@@ -1,0 +1,10 @@
+[submodule "dependencies/cglm"]
+	path = dependencies/cglm
+	url = https://github.com/recp/cglm.git
+	ignore = dirty
+[submodule "dependencies/cimgui"]
+	path = dependencies/cimgui
+	url = https://github.com/cimgui/cimgui.git
+[submodule "dependencies/glfw"]
+	path = dependencies/glfw
+	url = https://github.com/glfw/glfw.git
