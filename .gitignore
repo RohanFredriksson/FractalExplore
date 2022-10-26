@@ -1,0 +1,13 @@
+*.exe 
+*.cmake
+CMakeLists.txt
+CMakeCache.txt
+*.pc
+*.ini
+*.a
+Makefile
+CMakefiles
+CMakeFiles
+build
+dependencies/glad/CMakeFiles
+FractalExplore
