@@ -1,5 +1,6 @@
 #include "external.h"
 #include "renderer.h"
+#include "util.h"
 
 Shader* shader;
 GLuint VAO, VBO, EBO;
@@ -56,7 +57,28 @@ void Renderer_BindShader(Shader* s) {
 }
 
 void Renderer_Render() {
-    Shader_Use(shader);
+    
+	double xMin = Camera_GetX() - Camera_GetProjectionWidth() / 2.0;
+	double yMin = Camera_GetY() - Camera_GetProjectionHeight() / 2.0;
+	double xMax = Camera_GetX() + Camera_GetProjectionWidth() / 2.0;
+	double yMax = Camera_GetY() + Camera_GetProjectionHeight() / 2.0;
+
+	float xMinHigh, xMinLow, yMinHigh, yMinLow, xMaxHigh, xMaxLow, yMaxHigh, yMaxLow;
+	split_double(xMin, &xMinHigh, &xMinLow);
+	split_double(xMax, &xMaxHigh, &xMaxLow);
+	split_double(yMin, &yMinHigh, &yMinLow);
+	split_double(yMax, &yMaxHigh, &yMaxLow);
+
+	Shader_UploadFloat(shader, "xMinHigh", xMinHigh);
+	Shader_UploadFloat(shader, "xMinLow",  xMinLow);
+	Shader_UploadFloat(shader, "yMinHigh", yMinHigh);
+	Shader_UploadFloat(shader, "yMinLow",  yMinLow);
+	Shader_UploadFloat(shader, "xMaxHigh", xMaxHigh);
+	Shader_UploadFloat(shader, "xMaxLow",  xMaxLow);
+	Shader_UploadFloat(shader, "yMaxHigh", yMaxHigh);
+	Shader_UploadFloat(shader, "yMaxLow",  yMaxLow);
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
 }

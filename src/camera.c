@@ -11,8 +11,8 @@ double zoom;
 void Camera_Init() {
     xPos = 0.0;
     yPos = 0.0;
-    projectionWidth = 0.0;
-    projectionHeight = 2.0;
+    projectionWidth = 4.0;
+    projectionHeight = 4.0;
     zoom = 1.0;
     Camera_AdjustProjection();
 }

@@ -10,8 +10,7 @@ struct ImGuiContext* ctx;
 struct ImGuiIO* io;
 
 FrameBuffer entityTexture;
-Shader* defaultShader;
-Shader* entityShader;
+Shader* fractalShader;
 
 ivec2 windowSize = { 800, 800 };
 float fps = -1.0f;
@@ -76,9 +75,8 @@ int Window_Init() {
     Camera_Init();
     Renderer_Init();
     FrameBuffer_Init(&entityTexture, windowSize[0], windowSize[1]);
-    defaultShader = ShaderPool_Get("./assets/shaders/default.vert", "./assets/shaders/default.frag");
-    entityShader = ShaderPool_Get("./assets/shaders/default.vert", "./assets/shaders/entity.frag");
-
+    fractalShader = ShaderPool_Get("./assets/shaders/mandelbrot.vert", "./assets/shaders/mandelbrot.frag");
+    Renderer_BindShader(fractalShader);
     return 0;
 }
 
@@ -102,6 +100,8 @@ void Window_Loop() {
             igNewFrame();
             igShowDemoWindow(NULL);
             //----
+
+            Renderer_Render();
 
             // Render the imgui
             igRender();
