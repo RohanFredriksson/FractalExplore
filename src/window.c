@@ -75,6 +75,7 @@ int Window_Init() {
 
     // Set up the window attributes.
     Camera_Init(&camera);
+    Renderer_Init();
     FrameBuffer_Init(&entityTexture, windowSize[0], windowSize[1]);
     defaultShader = ShaderPool_Get("./assets/shaders/default.vert", "./assets/shaders/default.frag");
     entityShader = ShaderPool_Get("./assets/shaders/default.vert", "./assets/shaders/entity.frag");
