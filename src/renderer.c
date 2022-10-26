@@ -1,5 +1,6 @@
 #include "external.h"
 #include "renderer.h"
+#include "camera.h"
 #include "util.h"
 
 Shader* shader;
