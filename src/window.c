@@ -163,8 +163,8 @@ void Window_SetHeight(int height) {
     windowSize[1] = height;
 }
 
-float Window_GetAspectRatio() {
-    return (float) windowSize[0] / (float) windowSize[1];
+double Window_GetAspectRatio() {
+    return (double) windowSize[0] / (double) windowSize[1];
 }
 
 Camera* Window_GetCamera() {

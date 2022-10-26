@@ -20,7 +20,7 @@ int Window_GetWidth();
 int Window_GetHeight();
 void Window_SetWidth(int width);
 void Window_SetHeight(int height);
-float Window_GetAspectRatio();
+double Window_GetAspectRatio();
 Camera* Window_GetCamera();
 
 void Window_SetWindowed();

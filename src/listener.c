@@ -62,17 +62,17 @@ int MouseListener_MouseButtonsDown = 0;
 
 void MouseListener_CalcOrthoX() {
 
-    float currentX = ((float)MouseListener_X / Window_GetWidth()) * 2.0f - 1.0f;
+    double currentX = (MouseListener_X / Window_GetWidth()) * 2.0 - 1.0;
     Camera* camera =  Window_GetCamera();
-    MouseListener_WorldX = camera->pos[0] + (currentX / 2.0f) * (camera->projectionSize[0] / camera->zoom);
+    MouseListener_WorldX = camera->xPos + (currentX / 2.0) * (camera->projectionWidth / camera->zoom);
 
 }
 
 void MouseListener_CalcOrthoY() {
 
-    float currentY = ((float)MouseListener_Y / Window_GetHeight()) * 2.0f - 1.0f;
+    double currentY = (MouseListener_Y / Window_GetHeight()) * 2.0 - 1.0;
     Camera* camera =  Window_GetCamera();
-    MouseListener_WorldY = -(camera->pos[1] + (currentY / 2.0f) * (camera->projectionSize[1] / camera->zoom));
+    MouseListener_WorldY = -(camera->yPos + (currentY / 2.0) * (camera->projectionHeight / camera->zoom));
 
 }
 
