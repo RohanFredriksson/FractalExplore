@@ -22,7 +22,6 @@ int Window_GetHeight();
 void Window_SetWidth(int width);
 void Window_SetHeight(int height);
 double Window_GetAspectRatio();
-Camera* Window_GetCamera();
 
 void Window_SetWindowed();
 void Window_SetFullscreen();

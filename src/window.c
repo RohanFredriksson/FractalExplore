@@ -9,7 +9,6 @@ GLFWwindow* window;
 struct ImGuiContext* ctx;
 struct ImGuiIO* io;
 
-Camera camera;
 FrameBuffer entityTexture;
 Shader* defaultShader;
 Shader* entityShader;
@@ -74,7 +73,7 @@ int Window_Init() {
     //Window_SetFullscreenWindowed();
 
     // Set up the window attributes.
-    Camera_Init(&camera);
+    Camera_Init();
     Renderer_Init();
     FrameBuffer_Init(&entityTexture, windowSize[0], windowSize[1]);
     defaultShader = ShaderPool_Get("./assets/shaders/default.vert", "./assets/shaders/default.frag");
@@ -166,10 +165,6 @@ void Window_SetHeight(int height) {
 
 double Window_GetAspectRatio() {
     return (double) windowSize[0] / (double) windowSize[1];
-}
-
-Camera* Window_GetCamera() {
-    return &camera;
 }
 
 void Window_SetWindowed() {

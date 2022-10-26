@@ -40,7 +40,7 @@ void WindowListener_ResizeCallback(GLFWwindow* window, int screenWidth, int scre
     Window_SetWidth(screenWidth);
     Window_SetHeight(screenHeight);
     Window_ResetFramebuffers();
-    Camera_AdjustProjection(Window_GetCamera());
+    Camera_AdjustProjection();
     glViewport(0, 0, screenWidth, screenHeight);
 
 }
@@ -61,19 +61,13 @@ bool MouseListener_IsDragging = 0;
 int MouseListener_MouseButtonsDown = 0;
 
 void MouseListener_CalcOrthoX() {
-
     double currentX = (MouseListener_X / Window_GetWidth()) * 2.0 - 1.0;
-    Camera* camera =  Window_GetCamera();
-    MouseListener_WorldX = camera->xPos + (currentX / 2.0) * (camera->projectionWidth / camera->zoom);
-
+    MouseListener_WorldX = Camera_GetX() + (currentX / 2.0) * (Camera_GetProjectionWidth() / Camera_GetZoom());
 }
 
 void MouseListener_CalcOrthoY() {
-
     double currentY = (MouseListener_Y / Window_GetHeight()) * 2.0 - 1.0;
-    Camera* camera =  Window_GetCamera();
-    MouseListener_WorldY = -(camera->yPos + (currentY / 2.0) * (camera->projectionHeight / camera->zoom));
-
+    MouseListener_WorldY = -(Camera_GetY() + (currentY / 2.0) * (Camera_GetProjectionHeight() / Camera_GetZoom()));
 }
 
 void MouseListener_MousePosCallback(GLFWwindow* window, double xPos, double yPos) {
