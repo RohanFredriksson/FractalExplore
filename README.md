@@ -1,4 +1,4 @@
-# FractalExplore
+# FractalExplore C++
 
 #### Description
 This project is the successor to my other project FractalGenerator. A simple window application that allows a user to view the marvels of fractal images in real time using shaders. The user can freely roam the intricate details of fractals by zooming and scrolling. Currently there is only support for rendering the Mandelbrot Set but there are plans to include other fractals, as well as introducing different visualisation schemes.
