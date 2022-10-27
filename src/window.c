@@ -89,27 +89,47 @@ void Window_Loop() {
     while (!glfwWindowShouldClose(window)) {
 
         glfwPollEvents();
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (dt > 0) {
+        if (MouseListener_MouseDragging()) {
+            if (MouseListener_GetDx() != 0) {Camera_SetX(Camera_GetX() - MouseListener_GetWorldDx());}
+            if (MouseListener_GetDy() != 0) {Camera_SetY(Camera_GetY() - MouseListener_GetWorldDy());}
+        }
 
-            //----
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            igNewFrame();
-            igShowDemoWindow(NULL);
-            //----
+        if (MouseListener_GetScrollY() != 0) {
 
-            Renderer_Render();
+            if (MouseListener_GetScrollY() > 0) {
+                Camera_SetZoom(Camera_GetZoom() * 1.1);
+                Camera_SetX(Camera_GetX() + (MouseListener_GetWorldX() - Camera_GetX()) * 0.0909090909);
+                Camera_SetY(Camera_GetY() + (MouseListener_GetWorldY() - Camera_GetY()) * 0.0909090909);
+            }
 
-            // Render the imgui
-            igRender();
-            ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
+            else {
+                Camera_SetZoom(Camera_GetZoom() / 1.1);
+                Camera_SetX(Camera_GetX() - (MouseListener_GetWorldX() - Camera_GetX()) * 0.1);
+                Camera_SetY(Camera_GetY() - (MouseListener_GetWorldY() - Camera_GetY()) * 0.1);
+            }
+
+            Camera_AdjustProjection();
 
         }
 
+        //----
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        igNewFrame();
+        igShowDemoWindow(NULL);
+        //----
+
+        Renderer_Render();
+
+        // Render the imgui
+        igRender();
+        ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
+
         glfwSwapBuffers(window);
+        MouseListener_EndFrame();
         endTime = (float)glfwGetTime();
         dt = endTime - beginTime;
         beginTime = endTime;

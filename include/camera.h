@@ -12,4 +12,8 @@ double Camera_GetX();
 double Camera_GetY();
 double Camera_GetZoom();
 
+void Camera_SetX(double x);
+void Camera_SetY(double y);
+void Camera_SetZoom(double z);
+
 #endif

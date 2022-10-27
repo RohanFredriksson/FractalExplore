@@ -59,10 +59,10 @@ void Renderer_BindShader(Shader* s) {
 
 void Renderer_Render() {
     
-	double xMin = Camera_GetX() - Camera_GetProjectionWidth() / 2.0;
-	double yMin = Camera_GetY() - Camera_GetProjectionHeight() / 2.0;
-	double xMax = Camera_GetX() + Camera_GetProjectionWidth() / 2.0;
-	double yMax = Camera_GetY() + Camera_GetProjectionHeight() / 2.0;
+	double xMin = Camera_GetX() - Camera_GetProjectionWidth()  / (2.0 * Camera_GetZoom());
+	double yMin = Camera_GetY() - Camera_GetProjectionHeight() / (2.0 * Camera_GetZoom());
+	double xMax = Camera_GetX() + Camera_GetProjectionWidth()  / (2.0 * Camera_GetZoom());
+	double yMax = Camera_GetY() + Camera_GetProjectionHeight() / (2.0 * Camera_GetZoom());
 
 	float xMinHigh, xMinLow, yMinHigh, yMinLow, xMaxHigh, xMaxLow, yMaxHigh, yMaxLow;
 	split_double(xMin, &xMinHigh, &xMinLow);

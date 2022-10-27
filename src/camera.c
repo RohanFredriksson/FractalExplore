@@ -40,3 +40,15 @@ double Camera_GetY() {
 double Camera_GetZoom() {
     return zoom;
 }
+
+void Camera_SetX(double x) {
+    xPos = x;
+}
+
+void Camera_SetY(double y) {
+    yPos = y;
+}
+
+void Camera_SetZoom(double z) {
+    zoom = z;
+}

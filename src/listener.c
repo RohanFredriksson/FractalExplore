@@ -67,7 +67,7 @@ void MouseListener_CalcOrthoX() {
 
 void MouseListener_CalcOrthoY() {
     double currentY = (MouseListener_Y / Window_GetHeight()) * 2.0 - 1.0;
-    MouseListener_WorldY = -(Camera_GetY() + (currentY / 2.0) * (Camera_GetProjectionHeight() / Camera_GetZoom()));
+    MouseListener_WorldY = Camera_GetY() - (currentY / 2.0) * (Camera_GetProjectionHeight() / Camera_GetZoom());
 }
 
 void MouseListener_MousePosCallback(GLFWwindow* window, double xPos, double yPos) {
