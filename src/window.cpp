@@ -78,7 +78,8 @@ void Window::loop() {
 
 	// Shaders
 	Shader mandelbrot("assets/shaders/mandelbrot.vert", "assets/shaders/mandelbrot.frag");
-	
+	Shader hsv("assets/shaders/hsv.vert", "assets/shaders/hsv.frag");
+
 	// Framebuffer
 	Framebuffer framebuffer(GL_RGB, this->width, this->height, GL_RGB, GL_UNSIGNED_BYTE);
 
@@ -90,10 +91,7 @@ void Window::loop() {
 	while (!glfwWindowShouldClose(this->glfwWindow)) {	
 
 		glfwPollEvents();
-
-		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
+		
 		if (MouseListener::isDragging()) {
 			if (MouseListener::getDx() != 0) {this->camera->position.x = this->camera->position.x + (MouseListener::getWorldDx());}
 			if (MouseListener::getDy() != 0) {this->camera->position.y = this->camera->position.y - (MouseListener::getWorldDy());}
@@ -118,14 +116,20 @@ void Window::loop() {
 		}
 
 		// Render grayscale mandelbrot set to framebuffer.
+		framebuffer.bind();
 		mandelbrot.uploadMat4("uProjection", Window::getCamera()->getProjection());
     	mandelbrot.uploadMat4("uView", Window::getCamera()->getView());
-		//framebuffer.bind();
+		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 		renderer.render();
-		//framebuffer.unbind();
+		framebuffer.unbind();
 
 		// Apply post processing to the image.
-
+		glActiveTexture(GL_TEXTURE0 + 1);
+		framebuffer.getTexture()->bind();
+		hsv.uploadTexture("uTexture", 0);
+		framebuffer.getTexture()->unbind();
+		renderer.render();
 
 		MouseListener::endFrame();
 		glfwSwapBuffers(this->glfwWindow);

@@ -4,11 +4,20 @@
 #include "renderer.hpp"
 #include "window.hpp"
 
+const int POS_SIZE = 2;
+const int TEX_COORDS_SIZE = 2;
+
+const int POS_OFFSET = 0;
+const int TEX_COORDS_OFFSET = POS_OFFSET + POS_SIZE * sizeof(float);
+
+const int VERTEX_SIZE = POS_SIZE + TEX_COORDS_SIZE;
+const int VERTEX_SIZE_BYTES = VERTEX_SIZE * sizeof(float);
+
 GLfloat vertices[] = {
-    2.0f,  2.0f, // Top Right
-    2.0f, -2.0f, // Bottom Right
-    -2.0f, -2.0f, // Bottom Left
-    -2.0f,  2.0f, // Top Left
+     2.0f,  2.0f, 1.0f, 1.0f, // Top Right
+     2.0f, -2.0f, 1.0f, 0.0f, // Bottom Right
+    -2.0f, -2.0f, 0.0f, 0.0f, // Bottom Left
+    -2.0f,  2.0f, 0.0f, 1.0f  // Top Left
 };
 
 GLuint indices[] = {
@@ -18,35 +27,26 @@ GLuint indices[] = {
 
 void Renderer::start() {
 
-    // Generate the VAO, VBO, and EBO with only 1 object each
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
 	glGenBuffers(1, &this->EBO);
 
-	// Make the VAO the current Vertex Array Object by binding it
 	glBindVertexArray(VAO);
 
-	// Bind the VBO specifying it's a GL_ARRAY_BUFFER
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-	// Introduce the vertices into the VBO
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	// Bind the EBO specifying it's a GL_ELEMENT_ARRAY_BUFFER
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-	// Introduce the indices into the EBO
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// Configure the Vertex Attribute so that OpenGL knows how to read the VBO
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	// Enable the Vertex Attribute so that OpenGL knows to use it
+	glVertexAttribPointer(0, POS_SIZE, GL_FLOAT, GL_FALSE, VERTEX_SIZE_BYTES, (void*) POS_OFFSET);
 	glEnableVertexAttribArray(0);
 
-	// Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
+	glVertexAttribPointer(1, TEX_COORDS_SIZE, GL_FLOAT, GL_FALSE, VERTEX_SIZE_BYTES, (void*) TEX_COORDS_OFFSET);
+    glEnableVertexAttribArray(1);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-	// Bind the EBO to 0 so that we don't accidentally modify it
-	// MAKE SURE TO UNBIND IT AFTER UNBINDING THE VAO, as the EBO is linked in the VAO
-	// This does not apply to the VBO because the VBO is already linked to the VAO during glVertexAttribPointer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
