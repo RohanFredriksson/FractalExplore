@@ -9,7 +9,8 @@
 #include "shader.hpp"
 #include "window.hpp"
 #include "listener.hpp"
-#include "fractalrenderer.hpp"
+#include "framebuffer.hpp"
+#include "renderer.hpp"
 
 Window::Window() {
 
@@ -75,13 +76,16 @@ void Window::init() {
 
 void Window::loop() {
 
-    const char* v = "assets/shaders/mandelbrot.vert";
-	const char* f = "assets/shaders/mandelbrot.frag";
-	Shader mandelbrot(v, f);
+	// Shaders
+	Shader mandelbrot("assets/shaders/mandelbrot.vert", "assets/shaders/mandelbrot.frag");
+	
+	// Framebuffer
+	Framebuffer framebuffer(GL_RGB, this->width, this->height, GL_RGB, GL_UNSIGNED_BYTE);
 
-	FractalRenderer renderer(&mandelbrot);
+	// Renderer
+	Renderer renderer;
 	renderer.start();
-
+	
 	// Main while loop
 	while (!glfwWindowShouldClose(this->glfwWindow)) {	
 
@@ -113,7 +117,16 @@ void Window::loop() {
 			
 		}
 
+		// Render grayscale mandelbrot set to framebuffer.
+		mandelbrot.uploadMat4("uProjection", Window::getCamera()->getProjection());
+    	mandelbrot.uploadMat4("uView", Window::getCamera()->getView());
+		//framebuffer.bind();
 		renderer.render();
+		//framebuffer.unbind();
+
+		// Apply post processing to the image.
+
+
 		MouseListener::endFrame();
 		glfwSwapBuffers(this->glfwWindow);
 
