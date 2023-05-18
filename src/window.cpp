@@ -78,7 +78,6 @@ void Window::loop() {
     const char* v = "assets/shaders/mandelbrot.vert";
 	const char* f = "assets/shaders/mandelbrot.frag";
 	Shader mandelbrot(v, f);
-	mandelbrot.compile();
 
 	FractalRenderer renderer(&mandelbrot);
 	renderer.start();
@@ -120,8 +119,6 @@ void Window::loop() {
 
 	}
 
-    mandelbrot.deleteProgram();
-    
 }
 
 void Window::exit() {
