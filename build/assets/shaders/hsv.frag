@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec2 fPos;
+in vec2 fPosition;
 in vec2 fTexCoords;
 
 uniform sampler2D uTexture;

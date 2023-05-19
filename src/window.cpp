@@ -117,8 +117,8 @@ void Window::loop() {
 
 		// Render grayscale mandelbrot set to framebuffer.
 		framebuffer.bind();
-		mandelbrot.uploadMat4("uProjection", Window::getCamera()->getProjection());
-    	mandelbrot.uploadMat4("uView", Window::getCamera()->getView());
+		mandelbrot.uploadVec2("uPosition", this->camera->position);
+    	mandelbrot.uploadVec2("uProjectionSize", this->camera->getProjectionSize() / this->camera->getZoom());
 		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		renderer.render();

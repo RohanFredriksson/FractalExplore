@@ -14,10 +14,10 @@ const int VERTEX_SIZE = POS_SIZE + TEX_COORDS_SIZE;
 const int VERTEX_SIZE_BYTES = VERTEX_SIZE * sizeof(float);
 
 GLfloat vertices[] = {
-     2.0f,  2.0f, 1.0f, 1.0f, // Top Right
-     2.0f, -2.0f, 1.0f, 0.0f, // Bottom Right
-    -2.0f, -2.0f, 0.0f, 0.0f, // Bottom Left
-    -2.0f,  2.0f, 0.0f, 1.0f  // Top Left
+     1.0f,  1.0f, 1.0f, 1.0f, // Top Right
+     1.0f, -1.0f, 1.0f, 0.0f, // Bottom Right
+    -1.0f, -1.0f, 0.0f, 0.0f, // Bottom Left
+    -1.0f,  1.0f, 0.0f, 1.0f  // Top Left
 };
 
 GLuint indices[] = {
