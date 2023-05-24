@@ -23,6 +23,7 @@ class Arbitrary {
 
         void operator=(const Arbitrary& other);
         Arbitrary operator+(const Arbitrary& other);
+        Arbitrary operator-(const Arbitrary& other);
         Arbitrary operator*(const Arbitrary& other);
-
+        
 };

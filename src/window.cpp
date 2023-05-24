@@ -114,10 +114,10 @@ int main() {
 
 		glfwPollEvents();
 		
-		//if (MouseListener::isDragging()) {
-		//	if (MouseListener::getDx() != 0) {this->camera.position.x = this->camera.position.x + (MouseListener::getWorldDx());}
-		//	if (MouseListener::getDy() != 0) {this->camera.position.y = this->camera.position.y - (MouseListener::getWorldDy());}
-		//}
+		if (MouseListener::isMouseDragging()) {
+			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - (MouseListener::getWorldDx());}
+			if (MouseListener::getDy() != 0.0) {camera.y = camera.y + (MouseListener::getWorldDy());}
+		}
 
 		if (MouseListener::getScrollY() != 0.0f) {
 

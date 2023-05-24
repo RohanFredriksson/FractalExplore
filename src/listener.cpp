@@ -15,10 +15,10 @@ namespace {
     double y = 0.0; 
     double lastX = 0.0; 
     double lastY = 0.0; 
-    double worldX = 0.0; 
-    double worldY = 0.0; 
-    double lastWorldX = 0.0; 
-    double lastWorldY = 0.0;
+    Arbitrary worldX(0.0f); 
+    Arbitrary worldY (0.0f); 
+    Arbitrary lastWorldX(0.0f); 
+    Arbitrary lastWorldY(0.0f);
     bool mouseDown[9] = {0};
     bool mouseBeginDown[9] = {0};
     int mouseDownCount = 0;
@@ -76,19 +76,15 @@ void WindowListener::resizeCallback(GLFWwindow* window, int screenWidth, int scr
 }
 
 void MouseListener::calcOrthoX() {
-
-    //float currentX = ((float) x / Window::getWidth()) * 2.0f - 1.0f;
-    //Camera* camera = Window::getScene()->getCamera();
-    //worldX = camera->getPosition().x + (currentX / 2.0f) * (camera->getProjectionSize().x / camera->getZoom());
-
+    float currentX = ((float) x / Window::getWidth()) * 2.0f - 1.0f;
+    Camera* camera = Window::getCamera();
+    worldX = camera->x + Arbitrary(0.5f * currentX) * (camera->width);// / camera->zoom);
 }
 
 void MouseListener::calcOrthoY() {
-
-    //float currentY = ((float) y / Window::getHeight()) * 2.0f - 1.0f;
-    //Camera* camera = Window::getScene()->getCamera();
-    //worldY = camera->getPosition().y + (currentY / 2.0f) * (camera->getProjectionSize().y / camera->getZoom());
-
+    float currentY = ((float) y / Window::getHeight()) * 2.0f - 1.0f;
+    Camera* camera = Window::getCamera();
+    worldY = camera->y + Arbitrary(0.5f * currentY) * (camera->height);// / camera->zoom);
 }
 
 void MouseListener::mousePosCallback(GLFWwindow* window, double xPos, double yPos) {
@@ -103,8 +99,8 @@ void MouseListener::mousePosCallback(GLFWwindow* window, double xPos, double yPo
     lastWorldY = worldY;
     x = xPos;
     y = yPos;
-    //calcOrthoX();
-    //calcOrthoY();
+    calcOrthoX();
+    calcOrthoY();
 
 }
 
@@ -177,19 +173,19 @@ double MouseListener::getDy() {
     return y - lastY;
 }
 
-double MouseListener::getWorldX() {
+Arbitrary MouseListener::getWorldX() {
     return worldX;
 }
 
-double MouseListener::getWorldY() {
+Arbitrary MouseListener::getWorldY() {
     return worldY;
 }
 
-double MouseListener::getWorldDx() {
+Arbitrary MouseListener::getWorldDx() {
     return worldX - lastWorldX;
 }
 
-double MouseListener::getWorldDy() {
+Arbitrary MouseListener::getWorldDy() {
     return worldY - lastWorldY;
 }
 
@@ -209,7 +205,7 @@ void MouseListener::endFrame() {
     lastY = y;
     lastWorldX = worldX;
     lastWorldY = worldY;
-    //calcOrthoX();
-    //calcOrthoY();
+    calcOrthoX();
+    calcOrthoY();
 
 }

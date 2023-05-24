@@ -4,7 +4,7 @@
 namespace {
 
     const int BASE = 10000;
-    const int PRECISION = 2;
+    const int PRECISION = 5;
 
     void round(int x, int* carry, int* keep) {
         *carry = x / BASE;
@@ -118,6 +118,16 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
     }
 
     return result;
+}
+
+Arbitrary Arbitrary::operator-(const Arbitrary& other) {
+
+    Arbitrary a = *this;
+    Arbitrary b = other;
+    b.negate();
+    
+    return a + b;
+
 }
 
 Arbitrary Arbitrary::operator*(const Arbitrary& other) {

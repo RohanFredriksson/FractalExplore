@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include "arbitrary.hpp"
 
 namespace KeyListener {
     void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -28,10 +29,10 @@ namespace MouseListener {
     double getY();
     double getDx();
     double getDy();
-    double getWorldX();
-    double getWorldY();
-    double getWorldDx();
-    double getWorldDy();
+    Arbitrary getWorldX();
+    Arbitrary getWorldY();
+    Arbitrary getWorldDx();
+    Arbitrary getWorldDy();
     double getScrollX();
     double getScrollY();
     void endFrame();
