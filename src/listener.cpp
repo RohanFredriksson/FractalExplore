@@ -1,235 +1,215 @@
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "listener.hpp"
+#include "camera.hpp"
+#include "window.hpp"
 
-KeyListener::KeyListener() {
+namespace {
 
-}
+    bool keyDown[350] = {0};
+    bool keyBeginDown[350] = {0};
+    int keyPressCount = 0;
 
-KeyListener* KeyListener::get() {
-
-    if  (KeyListener::instance == NULL) {
-         KeyListener::instance = new KeyListener;
-    }
-
-    return KeyListener::instance;
-
+    double scrollX = 0.0;
+    double scrollY = 0.0;
+    double x = 0.0; 
+    double y = 0.0; 
+    double lastX = 0.0; 
+    double lastY = 0.0; 
+    double worldX = 0.0; 
+    double worldY = 0.0; 
+    double lastWorldX = 0.0; 
+    double lastWorldY = 0.0;
+    bool mouseDown[9] = {0};
+    bool mouseBeginDown[9] = {0};
+    int mouseDownCount = 0;
+    bool mouseDragging = 0;
+    
 }
 
 void KeyListener::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
+    if (key < 0 || key > 349) {return;}
+
     if (action == GLFW_PRESS) {
-        KeyListener::get()->keyPressed[key] = true;
-        KeyListener::get()->keyBeginPress[key] = true;
+        keyPressCount++;
+        keyDown[key] = true;
+        keyBeginDown[key] = true;
     }
 
     else if (action == GLFW_RELEASE) {
-        KeyListener::get()->keyPressed[key] = false;
-        KeyListener::get()->keyBeginPress[key] = false;
+        keyPressCount--;
+        keyDown[key] = false;
+        keyBeginDown[key] = false;
     }
 
 }
 
-bool KeyListener::isKeyPressed(int key) {
-    return KeyListener::get()->keyPressed[key];
+bool KeyListener::isKeyDown(int key) {
+    if (key < 0 || key > 349) {return false;}
+    return keyDown[key];
 }
 
-bool KeyListener::isBeginPress(int key) {
+bool KeyListener::isKeyDown() {
+    return keyPressCount > 0;
+}
 
-    bool result = KeyListener::get()->keyBeginPress[key];
-    if (result) {
-        KeyListener::get()->keyBeginPress[key] = false;
+bool KeyListener::isKeyBeginDown(int key) {
+
+    if (key < 0 || key > 349) {return false;}
+
+    if (keyBeginDown[key]) {
+        keyBeginDown[key] = false;
+        return true;
     }
 
-    return result;
+    return false;
 }
 
-KeyListener* KeyListener::instance = NULL;
+void WindowListener::resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
 
-MouseListener::MouseListener() {
-
-    this->scrollX = 0.0;
-    this->scrollY = 0.0;
-    this->xPos    = 0.0;
-    this->yPos    = 0.0;
-    this->lastX   = 0.0;
-    this->lastY   = 0.0;
+    Window::setWidth(screenWidth);
+    Window::setHeight(screenHeight);
+    Window::resetFramebuffers();
+    Window::getCamera()->adjust();
+    glViewport(0, 0, screenWidth, screenHeight);
 
 }
 
-MouseListener* MouseListener::get() {
-    
-    if  (MouseListener::instance == NULL) {
-         MouseListener::instance = new MouseListener;
-    }
+void MouseListener::calcOrthoX() {
 
-    return MouseListener::instance;
+    //float currentX = ((float) x / Window::getWidth()) * 2.0f - 1.0f;
+    //Camera* camera = Window::getScene()->getCamera();
+    //worldX = camera->getPosition().x + (currentX / 2.0f) * (camera->getProjectionSize().x / camera->getZoom());
+
+}
+
+void MouseListener::calcOrthoY() {
+
+    //float currentY = ((float) y / Window::getHeight()) * 2.0f - 1.0f;
+    //Camera* camera = Window::getScene()->getCamera();
+    //worldY = camera->getPosition().y + (currentY / 2.0f) * (camera->getProjectionSize().y / camera->getZoom());
 
 }
 
 void MouseListener::mousePosCallback(GLFWwindow* window, double xPos, double yPos) {
-    
-    if (MouseListener::get()->mouseButtonsDown > 0) {
-        MouseListener::get()->isDraggings = true;
+
+    if (mouseDownCount > 0) {
+        mouseDragging = true;
     }
 
-    MouseListener::get()->lastX = MouseListener::get()->xPos;
-    MouseListener::get()->lastY = MouseListener::get()->yPos;
-    MouseListener::get()->lastWorldX = MouseListener::get()->worldX;
-    MouseListener::get()->lastWorldY = MouseListener::get()->worldY;
-    MouseListener::get()->xPos = xPos;
-    MouseListener::get()->yPos = yPos;
-    get()->calcOrthoX();
-    get()->calcOrthoY();
+    lastX = x;
+    lastY = y;
+    lastWorldX = worldX;
+    lastWorldY = worldY;
+    x = xPos;
+    y = yPos;
+    //calcOrthoX();
+    //calcOrthoY();
 
 }
 
 void MouseListener::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    
+
+    if (button > 8 || button < 0) {return;}
+
     if (action == GLFW_PRESS) {
-        
-        MouseListener::get()->mouseButtonsDown++;
-
-        if (button <  9) {
-            MouseListener::get()->mouseButtonPressed[button] = true;
-        }
-
+        mouseDownCount++;
+        mouseDown[button] = true;
+        mouseBeginDown[button] = true;
     }
 
     else if (action == GLFW_RELEASE) {
-
-        MouseListener::get()->mouseButtonsDown--;
-
-        if (button < 9) {
-            MouseListener::get()->mouseButtonPressed[button] = false;
-            MouseListener::get()->isDraggings = false;
-        }
-
+        mouseDownCount--;
+        mouseDown[button] = false;
+        mouseBeginDown[button] = false;
+        mouseDragging = false;
     }
 
 }
 
 void MouseListener::mouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+    scrollX = xOffset;
+    scrollY = yOffset;
+}
 
-    MouseListener::get()->scrollX = xOffset;
-    MouseListener::get()->scrollY = yOffset;
+bool MouseListener::isMouseDown(int button) {
+    if (button < 0 || button > 9) {return false;}
+    return mouseDown[button];
+}
 
+bool MouseListener::isMouseDown() {
+    return mouseDownCount > 0;
+}
+
+bool MouseListener::isMouseBeginDown(int button) {
+
+    if (button < 0 || button > 8) {return false;}
+
+    if (mouseBeginDown[button]) {
+        mouseBeginDown[button] = false;
+        return true;
+    }
+
+    return false;
+}
+
+bool MouseListener::hasMouseMoved() {
+    return x != lastX || y != lastY;
+}
+
+bool MouseListener::isMouseDragging() {
+    return mouseDragging;
+}
+
+double MouseListener::getX() {
+    return x;
+}
+
+double MouseListener::getY() {
+    return y;
+}
+
+double MouseListener::getDx() {
+    return x - lastX;
+}
+
+double MouseListener::getDy() {
+    return y - lastY;
+}
+
+double MouseListener::getWorldX() {
+    return worldX;
+}
+
+double MouseListener::getWorldY() {
+    return worldY;
+}
+
+double MouseListener::getWorldDx() {
+    return worldX - lastWorldX;
+}
+
+double MouseListener::getWorldDy() {
+    return worldY - lastWorldY;
+}
+
+double MouseListener::getScrollX() {
+    return scrollX;
+}
+
+double MouseListener::getScrollY() {
+    return scrollY;
 }
 
 void MouseListener::endFrame() {
-    
-    MouseListener::get()->scrollX = 0;
-    MouseListener::get()->scrollY = 0;
-    MouseListener::get()->lastX = MouseListener::get()->xPos;
-    MouseListener::get()->lastY = MouseListener::get()->yPos;
-    MouseListener::get()->lastWorldX = MouseListener::get()->worldX;
-    MouseListener::get()->lastWorldY = MouseListener::get()->worldY;
-    get()->calcOrthoX();
-    get()->calcOrthoY();
 
-}
-
-float MouseListener::getX() {
-    return (float)MouseListener::get()->xPos;
-}
-
-float MouseListener::getY() {
-    return (float)MouseListener::get()->yPos;
-}
-
-float MouseListener::getWorldDx() {
-    return (float)(MouseListener::get()->lastWorldX - MouseListener::get()->worldX);
-}
-
-float MouseListener::getWorldDy() {
-    return (float)(MouseListener::get()->lastWorldY - MouseListener::get()->worldY);
-}
-
-float MouseListener::getDx() {
-    return (float)(MouseListener::get()->lastX - MouseListener::get()->xPos);
-}
-
-float MouseListener::getDy() {
-    return (float)(MouseListener::get()->lastY - MouseListener::get()->yPos);
-}
-
-float MouseListener::getScrollX() {
-    return (float)MouseListener::get()->scrollX;
-}
-
-float MouseListener::getScrollY() {
-    return (float)MouseListener::get()->scrollY;
-}
-
-bool MouseListener::isDragging() {
-    return MouseListener::get()->isDraggings;
-}
-
-bool MouseListener::mouseButtonDown(int button) {
-
-    if (button < 9) {
-        return MouseListener::get()->mouseButtonPressed[button];
-    }
-    return false;
-
-}
-
-float MouseListener::getOrthoX() {
-    return (float)MouseListener::get()->worldX;
-}
-
-float MouseListener::getOrthoY() {
-    return (float)MouseListener::get()->worldY;
-}
-
-void MouseListener::calcOrthoX() {
-    
-    //float currentX = MouseListener::getX() - MouseListener::get()->viewportPos.x;
-    //currentX = (currentX / MouseListener::get()->viewportSize.x) * 2.0f - 1.0f;
-    //glm::vec4 tmp(currentX, 0, 0, 1);
-    //glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
-    //tmp = viewProjection * tmp;
-
-    //MouseListener::get()->worldX = tmp.x;
-
-}
-
-void MouseListener::calcOrthoY() {
-    
-    //float currentY = MouseListener::getY() - MouseListener::get()->viewportPos.y;
-    //currentY = (currentY / MouseListener::get()->viewportSize.y) * 2.0f - 1.0f;
-    //glm::vec4 tmp(0, currentY, 0, 1);
-    //glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
-    //tmp = viewProjection * tmp;
-
-    //MouseListener::get()->worldY = tmp.y;
-
-}
-
-void MouseListener::setViewportPos(float x, float y) {
-
-    MouseListener::get()->viewportPos.x = x;
-    MouseListener::get()->viewportPos.y = y;
-
-}
-
-void MouseListener::setViewportSize(float x, float y) {
-    
-    MouseListener::get()->viewportSize.x = x;
-    MouseListener::get()->viewportSize.y = y;
-    
-}
-
-MouseListener* MouseListener::instance = NULL;
-
-void WindowResizeListener::resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
-
-    //Window::setWidth(screenWidth);
-    //Window::setHeight(screenHeight);
-    //Window::getCamera()->adjust();
-    MouseListener::setViewportPos(0.0f, 0.0f);
-    MouseListener::setViewportSize(screenWidth, screenHeight);
-    glViewport(0, 0, screenWidth, screenHeight);
+    scrollX = 0.0;
+    scrollY = 0.0;
+    lastX = x;
+    lastY = y;
+    lastWorldX = worldX;
+    lastWorldY = worldY;
+    //calcOrthoX();
+    //calcOrthoY();
 
 }

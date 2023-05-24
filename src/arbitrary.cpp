@@ -24,7 +24,7 @@ Arbitrary::Arbitrary(float value) {
 }
 
 Arbitrary::~Arbitrary() {
-    free(this->values);
+    //free(this->values); // THIS CAUSES DOUBLE FREE
 }
 
 int Arbitrary::precision() {
