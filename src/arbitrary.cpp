@@ -14,17 +14,13 @@ namespace {
 }
 
 Arbitrary::Arbitrary() {
-    this->values = (int*) malloc(PRECISION * sizeof(int));
+    for (int i = 0; i < PRECISION; i++) {this->values.push_back(0);}
     this->zero();
 }
 
 Arbitrary::Arbitrary(float value) {
-    this->values = (int*) malloc(PRECISION * sizeof(int));
+    for (int i = 0; i < PRECISION; i++) {this->values.push_back(0);}
     this->load(value);
-}
-
-Arbitrary::~Arbitrary() {
-    //free(this->values); // THIS CAUSES DOUBLE FREE
 }
 
 int Arbitrary::precision() {
@@ -33,6 +29,10 @@ int Arbitrary::precision() {
 
 int Arbitrary::base() {
     return BASE;
+}
+
+int* Arbitrary::data() {
+    return this->values.data();
 }
 
 void Arbitrary::load(float value) {

@@ -8,15 +8,15 @@ class Arbitrary {
 
     public:
 
-        int* values;      
+        vector<int> values;      
 
         Arbitrary();
         Arbitrary(float value);
-        ~Arbitrary();
 
         int precision();
         int base();
 
+        int* data();
         void load(float value);
         void zero();
         void negate();
