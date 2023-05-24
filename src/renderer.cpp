@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 
 #include "renderer.hpp"
-#include "window.hpp"
 
 const int POS_SIZE = 2;
 const int TEX_COORDS_SIZE = 2;

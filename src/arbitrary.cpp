@@ -3,8 +3,8 @@
 
 namespace {
 
-    const int BASE = 100000;
-    const int PRECISION = 5;
+    const int BASE = 10000;
+    const int PRECISION = 2;
 
     void round(int x, int* carry, int* keep) {
         *carry = x / BASE;

@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 
 #include "listener.hpp"
-#include "window.hpp"
 
 KeyListener::KeyListener() {
 
@@ -186,25 +185,25 @@ float MouseListener::getOrthoY() {
 
 void MouseListener::calcOrthoX() {
     
-    float currentX = MouseListener::getX() - MouseListener::get()->viewportPos.x;
-    currentX = (currentX / MouseListener::get()->viewportSize.x) * 2.0f - 1.0f;
-    glm::vec4 tmp(currentX, 0, 0, 1);
-    glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
-    tmp = viewProjection * tmp;
+    //float currentX = MouseListener::getX() - MouseListener::get()->viewportPos.x;
+    //currentX = (currentX / MouseListener::get()->viewportSize.x) * 2.0f - 1.0f;
+    //glm::vec4 tmp(currentX, 0, 0, 1);
+    //glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
+    //tmp = viewProjection * tmp;
 
-    MouseListener::get()->worldX = tmp.x;
+    //MouseListener::get()->worldX = tmp.x;
 
 }
 
 void MouseListener::calcOrthoY() {
     
-    float currentY = MouseListener::getY() - MouseListener::get()->viewportPos.y;
-    currentY = (currentY / MouseListener::get()->viewportSize.y) * 2.0f - 1.0f;
-    glm::vec4 tmp(0, currentY, 0, 1);
-    glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
-    tmp = viewProjection * tmp;
+    //float currentY = MouseListener::getY() - MouseListener::get()->viewportPos.y;
+    //currentY = (currentY / MouseListener::get()->viewportSize.y) * 2.0f - 1.0f;
+    //glm::vec4 tmp(0, currentY, 0, 1);
+    //glm::mat4 viewProjection = Window::getCamera()->getInverseView() * Window::getCamera()->getInverseProjection();
+    //tmp = viewProjection * tmp;
 
-    MouseListener::get()->worldY = tmp.y;
+    //MouseListener::get()->worldY = tmp.y;
 
 }
 
@@ -226,9 +225,9 @@ MouseListener* MouseListener::instance = NULL;
 
 void WindowResizeListener::resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
 
-    Window::setWidth(screenWidth);
-    Window::setHeight(screenHeight);
-    Window::getCamera()->adjustProjection();
+    //Window::setWidth(screenWidth);
+    //Window::setHeight(screenHeight);
+    //Window::getCamera()->adjust();
     MouseListener::setViewportPos(0.0f, 0.0f);
     MouseListener::setViewportSize(screenWidth, screenHeight);
     glViewport(0, 0, screenWidth, screenHeight);
