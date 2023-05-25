@@ -139,10 +139,10 @@ int main() {
 
 		// Render grayscale mandelbrot set to framebuffer.
 		postprocessing->bind();
-		mandelbrot.uploadIntArray("ux", camera.x.precision(), camera.x.data());
-		mandelbrot.uploadIntArray("uy", camera.x.precision(), camera.y.data());
-		mandelbrot.uploadIntArray("uw", camera.x.precision(), camera.width.data());
-		mandelbrot.uploadIntArray("uh", camera.x.precision(), camera.height.data());
+		mandelbrot.uploadIntArray("ux", Arbitrary::precision(), camera.x.data());
+		mandelbrot.uploadIntArray("uy", Arbitrary::precision(), camera.y.data());
+		mandelbrot.uploadIntArray("uw", Arbitrary::precision(), camera.width.data());
+		mandelbrot.uploadIntArray("uh", Arbitrary::precision(), camera.height.data());
 		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		renderer.render();

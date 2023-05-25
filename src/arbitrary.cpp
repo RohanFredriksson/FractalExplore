@@ -1,5 +1,6 @@
 #include "arbitrary.hpp"
 #include <cstdlib>
+#include <cmath>
 
 namespace {
 
@@ -15,24 +16,12 @@ namespace {
 
 Arbitrary::Arbitrary() {
     for (int i = 0; i < PRECISION; i++) {this->values.push_back(0);}
-    this->zero();
+    this->load(0.0f);
 }
 
 Arbitrary::Arbitrary(float value) {
     for (int i = 0; i < PRECISION; i++) {this->values.push_back(0);}
     this->load(value);
-}
-
-int Arbitrary::precision() {
-    return PRECISION;
-}
-
-int Arbitrary::base() {
-    return BASE;
-}
-
-int* Arbitrary::data() {
-    return this->values.data();
 }
 
 void Arbitrary::load(float value) {
@@ -45,19 +34,92 @@ void Arbitrary::load(float value) {
 
 }
 
-void Arbitrary::zero() {
+int* Arbitrary::data() {
+    return this->values.data();
+}
+
+int Arbitrary::base() {
+    return BASE;
+}
+
+int Arbitrary::precision() {
+    return PRECISION;
+}
+
+int Arbitrary::sign(const Arbitrary n) {
 
     for (int i = 0; i < PRECISION; i++) {
-        this->values[i] = 0;
+        if (n.values[i] < 0) {return -1;}
+        else if (n.values[i] > 0) {return 1;}
     }
+
+    return 0;
 
 }
 
-void Arbitrary::negate() {
+float Arbitrary::value(const Arbitrary n) {
 
+    float result = 0.0f;
     for (int i = 0; i < PRECISION; i++) {
-        this->values[i] *= -1;
+        result /= BASE;
+        result += n.values[i];
     }
+
+    return result;
+
+}
+
+Arbitrary Arbitrary::negate(const Arbitrary n) {
+
+    Arbitrary result = n;
+    for (int i = 0; i < PRECISION; i++) {
+        result.values[i] *= -1;
+    }
+
+    return result;
+
+}
+
+Arbitrary Arbitrary::absolute(const Arbitrary n) {
+
+    Arbitrary result = n;
+    for (int i = 0; i < PRECISION; i++) {
+        result.values[i] = abs(result.values[i]);
+    }
+
+    return result;
+
+}
+
+Arbitrary Arbitrary::reciprocal(const Arbitrary n) {
+
+    Arbitrary y = n;
+    Arbitrary z = n;
+
+    bool negate = false;
+    if (Arbitrary::sign(z) < 0) {
+        negate = true;
+        y = Arbitrary::negate(y);
+        z = Arbitrary::negate(z);
+    }
+
+    for (int i = PRECISION - 1; i > 0; i--) {
+        z.values[i] = z.values[i-1];
+    }
+    z.values[0] = 1;
+    
+    Arbitrary precision(0.000001f);
+
+    for (int i = 0; i < 100; i++) {
+        z = z * (Arbitrary(2.0f) - (y * z));
+        std::cout << Arbitrary::value(z) << "\n";
+    }
+
+    if (negate) {
+        z = Arbitrary::negate(z);
+    }
+
+    return z;
 
 }
 
@@ -98,7 +160,7 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
 
     if (s1 != s2 && result.values[PRECISION-1] < 0) {
         
-        result.negate();
+        result = Arbitrary::negate(result);
         carry = 0;
 
         for (int i = 0; i < PRECISION; i++) {
@@ -113,7 +175,7 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
 
         }
 
-        result.negate();
+        result = Arbitrary::negate(result);
 
     }
 
@@ -123,8 +185,7 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
 Arbitrary Arbitrary::operator-(const Arbitrary& other) {
 
     Arbitrary a = *this;
-    Arbitrary b = other;
-    b.negate();
+    Arbitrary b = Arbitrary::negate(other);
     
     return a + b;
 
@@ -139,12 +200,12 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     bool negate = false;
 
     if (a.values[PRECISION-1] < 0) {
-        a.negate();
+        a = Arbitrary::negate(a);
         negate = !negate;
     }
 
     if (b.values[PRECISION-1] < 0) {
-        b.negate();
+        b = Arbitrary::negate(b);
         negate = !negate;
     }
 
@@ -179,10 +240,23 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     }
 
     if (negate) {
-        result.negate();
+        result = Arbitrary::negate(result);
     }
 
     free(prod);
     return result;
 
+}
+
+Arbitrary Arbitrary::operator/(const Arbitrary& other) {
+
+    Arbitrary a = *this;
+    Arbitrary b = Arbitrary::reciprocal(other);
+    
+    return a * b;
+
+}
+
+bool Arbitrary::operator>(const Arbitrary& other) {
+    return Arbitrary::sign(*this - other) > 0;
 }

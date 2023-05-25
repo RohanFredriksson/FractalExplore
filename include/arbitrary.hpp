@@ -12,18 +12,26 @@ class Arbitrary {
 
         Arbitrary();
         Arbitrary(float value);
-
-        int precision();
-        int base();
-
-        int* data();
         void load(float value);
-        void zero();
-        void negate();
+        int* data();
+
+        static int base();
+        static int precision();
+
+        static int sign(const Arbitrary n);
+        static float value(const Arbitrary n);
+        static Arbitrary negate(const Arbitrary n);
+        static Arbitrary absolute(const Arbitrary n);
+        static Arbitrary reciprocal(const Arbitrary n);
 
         void operator=(const Arbitrary& other);
         Arbitrary operator+(const Arbitrary& other);
         Arbitrary operator-(const Arbitrary& other);
         Arbitrary operator*(const Arbitrary& other);
-        
+        Arbitrary operator/(const Arbitrary& other);
+
+        bool operator>(const Arbitrary& other);
+
+
+
 };
