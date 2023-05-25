@@ -150,10 +150,7 @@ int main() {
 		postprocessing->unbind();
 
 		// Apply post processing to the image.
-		glActiveTexture(GL_TEXTURE0 + 1);
-		postprocessing->getTexture()->bind();
 		hsv.uploadTexture("uTexture", 0);
-		postprocessing->getTexture()->unbind();
 		renderer.render();
 
 		MouseListener::endFrame();

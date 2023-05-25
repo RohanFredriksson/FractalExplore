@@ -14,5 +14,5 @@ Camera::Camera() {
 }
 
 void Camera::adjust() {
-    this->width = this->width * Arbitrary(Window::getAspectRatio());
+    this->width = this->height * Arbitrary(Window::getAspectRatio());
 }
