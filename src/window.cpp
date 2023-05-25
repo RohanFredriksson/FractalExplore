@@ -122,15 +122,15 @@ int main() {
 		if (MouseListener::getScrollY() != 0.0f) {
 
 			if (MouseListener::getScrollY() > 0) {
-				//camera.zoom = camera.zoom * Arbitrary(1.1f);
-				//this->camera.position.x = this->camera.position.x + (MouseListener::getOrthoX() - this->camera.position.x) * 0.0909090909f;
-				//this->camera.position.y = this->camera.position.y - (MouseListener::getOrthoY() - this->camera.position.y) * 0.0909090909f;
+				camera.depth = camera.depth * Arbitrary(1.0f / 1.1f);
+				camera.x = camera.x + (MouseListener::getWorldX() - camera.x) * Arbitrary(0.0909090909f);
+				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
 			}
 
 			else {
-				//this->camera.setZoom(this->camera.getZoom() / 1.1f);
-				//this->camera.position.x = this->camera.position.x - (MouseListener::getOrthoX() - this->camera.position.x) * 0.1f;
-				//this->camera.position.y = this->camera.position.y + (MouseListener::getOrthoY() - this->camera.position.y) * 0.1f;
+				camera.depth = camera.depth * (Arbitrary(1.1f));
+				camera.x = camera.x - (MouseListener::getWorldX() - camera.x) * Arbitrary(0.1f);
+				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
 			}
 
 			camera.adjust();
@@ -143,6 +143,7 @@ int main() {
 		mandelbrot.uploadIntArray("uy", Arbitrary::precision(), camera.y.data());
 		mandelbrot.uploadIntArray("uw", Arbitrary::precision(), camera.width.data());
 		mandelbrot.uploadIntArray("uh", Arbitrary::precision(), camera.height.data());
+		mandelbrot.uploadIntArray("ud", Arbitrary::precision(), camera.depth.data());
 		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		renderer.render();

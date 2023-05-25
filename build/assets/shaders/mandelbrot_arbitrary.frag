@@ -11,6 +11,7 @@ uniform int ux[PRECISION];
 uniform int uy[PRECISION];
 uniform int uw[PRECISION];
 uniform int uh[PRECISION];
+uniform int ud[PRECISION];
 
 out vec4 colour;
 
@@ -212,6 +213,8 @@ void main() {
     assign(c_r, result);
     mul(c_r, uw);
     assign(c_r, result);
+    mul(c_r, ud);
+    assign(c_r, result);
     mul(c_r, tmp);
     assign(c_r, result);
     add(c_r, ux);
@@ -221,6 +224,8 @@ void main() {
     load(fPosition.y);
     assign(c_i, result);
     mul(c_i, uh);
+    assign(c_i, result);
+    mul(c_i, ud);
     assign(c_i, result);
     mul(c_i, tmp);
     assign(c_i, result);

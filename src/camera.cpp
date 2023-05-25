@@ -9,7 +9,7 @@ Camera::Camera() {
     this->y = Arbitrary(0.0f);
     this->width = Arbitrary(3.0f);
     this->height = Arbitrary(3.0f);
-    this->zoom = Arbitrary(1.0f);
+    this->depth = Arbitrary(1.0f);
     this->adjust();
 }
 

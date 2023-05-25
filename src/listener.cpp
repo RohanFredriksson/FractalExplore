@@ -78,13 +78,13 @@ void WindowListener::resizeCallback(GLFWwindow* window, int screenWidth, int scr
 void MouseListener::calcOrthoX() {
     float currentX = ((float) x / Window::getWidth()) * 2.0f - 1.0f;
     Camera* camera = Window::getCamera();
-    worldX = camera->x + Arbitrary(0.5f * currentX) * (camera->width);// / camera->zoom);
+    worldX = camera->x + Arbitrary(0.5f * currentX) * (camera->width * camera->depth);
 }
 
 void MouseListener::calcOrthoY() {
     float currentY = ((float) y / Window::getHeight()) * 2.0f - 1.0f;
     Camera* camera = Window::getCamera();
-    worldY = camera->y + Arbitrary(0.5f * currentY) * (camera->height);// / camera->zoom);
+    worldY = camera->y + Arbitrary(0.5f * currentY) * (camera->height * camera->depth);
 }
 
 void MouseListener::mousePosCallback(GLFWwindow* window, double xPos, double yPos) {

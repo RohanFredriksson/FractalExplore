@@ -10,7 +10,7 @@ class Camera {
         Arbitrary y;
         Arbitrary width;
         Arbitrary height;
-        Arbitrary zoom;
+        Arbitrary depth;
 
         Camera();
         void adjust();

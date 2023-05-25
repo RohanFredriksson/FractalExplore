@@ -110,9 +110,8 @@ Arbitrary Arbitrary::reciprocal(const Arbitrary n) {
     
     Arbitrary precision(0.000001f);
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 20; i++) {
         z = z * (Arbitrary(2.0f) - (y * z));
-        std::cout << Arbitrary::value(z) << "\n";
     }
 
     if (negate) {
