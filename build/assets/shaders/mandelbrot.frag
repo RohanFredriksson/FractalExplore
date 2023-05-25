@@ -1,9 +1,7 @@
 #version 330 core
 
 in vec2 fPosition;
-in vec2 fTexCoords;
-
-out vec4 colour;
+out vec4 fColour;
 
 vec2 complex_square(vec2 z) {
     return vec2(
@@ -37,5 +35,5 @@ float compute(vec2 c, float iterations) {
 }
 
 void main() {
-    colour = vec4(vec3(0.0,0.0,0.0) + compute(fPosition, 64), 1.0);
+    fColour = vec4(vec3(0.0,0.0,0.0) + compute(fPosition, 64), 1.0);
 }
