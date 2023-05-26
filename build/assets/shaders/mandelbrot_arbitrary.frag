@@ -1,7 +1,7 @@
 #version 330 core
 
 #define BASE 10000
-#define PRECISION 5
+#define PRECISION 4
 #define ITERATIONS 128
 
 in vec2 fPosition;

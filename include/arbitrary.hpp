@@ -1,8 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <string>
+#include <iostream>
 
 using std::vector;
+using std::string;
 
 class Arbitrary {   
 
@@ -22,16 +25,16 @@ class Arbitrary {
         static float value(const Arbitrary n);
         static Arbitrary negate(const Arbitrary n);
         static Arbitrary absolute(const Arbitrary n);
-        static Arbitrary reciprocal(const Arbitrary n);
 
         void operator=(const Arbitrary& other);
         Arbitrary operator+(const Arbitrary& other);
         Arbitrary operator-(const Arbitrary& other);
         Arbitrary operator*(const Arbitrary& other);
-        Arbitrary operator/(const Arbitrary& other);
 
-        bool operator>(const Arbitrary& other);
+        friend std::ostream& operator<<(std::ostream& os, const Arbitrary& a);
 
-
-
+        //static Arbitrary reciprocal(const Arbitrary n);
+        //Arbitrary operator/(const Arbitrary& other);
+        //bool operator>(const Arbitrary& other);
+        
 };
