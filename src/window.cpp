@@ -99,7 +99,7 @@ int main() {
 	postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
 	// Shaders
-	Shader mandelbrot("assets/shaders/mandelbrot_arbitrary.vert", "assets/shaders/mandelbrot_arbitrary.frag");
+	Shader mandelbrot("assets/shaders/mandelbrot.vert", "assets/shaders/mandelbrot.frag");
 	Shader hsv("assets/shaders/hsv.vert", "assets/shaders/hsv.frag");
 
 	// Renderer
@@ -108,15 +108,24 @@ int main() {
 
 	// Call the resize callback for initialisation.
 	WindowListener::resizeCallback(window, width, height);
+
+	// Loop variables
+	bool update = true;
+	float begin = (float) glfwGetTime();
+	float end = begin;
+	float dt = -1.0f;
 	
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {	
 
+		// Polling Stage
 		glfwPollEvents();
 		
+		// Update Stage
 		if (MouseListener::isMouseDragging()) {
 			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - (MouseListener::getWorldDx());}
 			if (MouseListener::getDy() != 0.0) {camera.y = camera.y + (MouseListener::getWorldDy());}
+			update = true;
 		}
 
 		if (MouseListener::getScrollY() != 0.0f) {
@@ -125,8 +134,8 @@ int main() {
 				camera.depth = camera.depth * Arbitrary(1.0f / 1.1f);
 				camera.x = camera.x + (MouseListener::getWorldX() - camera.x) * Arbitrary(0.0909090909f);
 				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
-			}
-
+			} 
+			
 			else {
 				camera.depth = camera.depth * (Arbitrary(1.1f));
 				camera.x = camera.x - (MouseListener::getWorldX() - camera.x) * Arbitrary(0.1f);
@@ -134,27 +143,46 @@ int main() {
 			}
 
 			camera.adjust();
-			
+			update = true;
+
 		}
 
-		// Render grayscale mandelbrot set to framebuffer.
-		postprocessing->bind();
-		mandelbrot.uploadIntArray("ux", Arbitrary::precision(), camera.x.data());
-		mandelbrot.uploadIntArray("uy", Arbitrary::precision(), camera.y.data());
-		mandelbrot.uploadIntArray("uw", Arbitrary::precision(), camera.width.data());
-		mandelbrot.uploadIntArray("uh", Arbitrary::precision(), camera.height.data());
-		mandelbrot.uploadIntArray("ud", Arbitrary::precision(), camera.depth.data());
-		glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		renderer.render();
-		postprocessing->unbind();
+		// Render Stage
+		if (update) {
 
-		// Apply post processing to the image.
-		hsv.uploadTexture("uTexture", 0);
-		renderer.render();
+			int precision = 5;
+			int iterations = 128;
 
+			// Render the mandelbrot in black and white.
+			postprocessing->bind();
+			mandelbrot.uploadInt("uPrecision", precision);
+			mandelbrot.uploadInt("uIterations", iterations);
+			mandelbrot.uploadIntArray("uReal", precision, camera.x.data());
+			mandelbrot.uploadIntArray("uImaginary", precision, camera.y.data());
+			mandelbrot.uploadIntArray("uWidth", precision, camera.width.data());
+			mandelbrot.uploadIntArray("uHeight", precision, camera.height.data());
+			mandelbrot.uploadIntArray("uDepth", precision, camera.depth.data());
+			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			renderer.render();
+			postprocessing->unbind();
+
+			// Apply post processing to the image.
+			hsv.uploadTexture("uTexture", 0);
+			renderer.render();
+
+			// Swap the buffer and lower the update flag.
+			glfwSwapBuffers(window);
+			update = false;
+
+		}
+		
+		// End Frame
 		MouseListener::endFrame();
-		glfwSwapBuffers(window);
+		end = (float) glfwGetTime();
+		dt = end - begin;
+		begin = end;
+		fps = 1.0f / dt;
 
 	}
 

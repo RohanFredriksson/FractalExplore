@@ -6,7 +6,7 @@
 namespace {
 
     const int BASE = 10000;
-    const int PRECISION = 4;
+    const int PRECISION = 5;
 
     void round(int x, int* carry, int* keep) {
         *carry = x / BASE;
@@ -27,7 +27,7 @@ Arbitrary::Arbitrary(float value) {
 
 void Arbitrary::load(float value) {
     
-    for (int i = PRECISION-1; i >= 0; i--) {
+    for (int i = 0; i < PRECISION; i++) {
         this->values[i] = int(value);
         value -= int(value);
         value *= BASE;
@@ -61,7 +61,7 @@ int Arbitrary::sign(const Arbitrary n) {
 float Arbitrary::value(const Arbitrary n) {
 
     float result = 0.0f;
-    for (int i = 0; i < PRECISION; i++) {
+    for (int i = PRECISION-1; i >= 0; i--) {
         result /= BASE;
         result += n.values[i];
     }
@@ -106,13 +106,13 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
     Arbitrary b = other;
     Arbitrary result;
 
-    bool s1 = a.values[PRECISION-1] >= 0;
-    bool s2 = b.values[PRECISION-1] >= 0;
+    bool s1 = a.values[0] >= 0;
+    bool s2 = b.values[0] >= 0;
 
     int carry = 0;
     int keep = 0;
 
-    for (int i = 0; i < PRECISION-1; i++) {
+    for (int i = PRECISION-1; i > 0; i--) {
         
         round(a.values[i] + b.values[i] + carry, &carry, &keep);
         if (keep < 0) {
@@ -124,15 +124,15 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
 
     }
 
-    round(a.values[PRECISION-1] + b.values[PRECISION-1] + carry, &carry, &keep);
-    result.values[PRECISION-1] = keep;
+    round(a.values[0] + b.values[0] + carry, &carry, &keep);
+    result.values[0] = keep;
 
-    if (s1 != s2 && result.values[PRECISION-1] < 0) {
+    if (s1 != s2 && result.values[0] < 0) {
         
         result = Arbitrary::negate(result);
         carry = 0;
 
-        for (int i = 0; i < PRECISION; i++) {
+        for (int i = PRECISION-1; i >= 0; i--) {
 
             round(result.values[i] + carry, &carry, &keep);
             if (keep < 0) {
@@ -168,12 +168,12 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
 
     bool negate = false;
 
-    if (a.values[PRECISION-1] < 0) {
+    if (a.values[0] < 0) {
         a = Arbitrary::negate(a);
         negate = !negate;
     }
 
-    if (b.values[PRECISION-1] < 0) {
+    if (b.values[0] < 0) {
         b = Arbitrary::negate(b);
         negate = !negate;
     }
@@ -182,7 +182,7 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     int* prod = (int*) calloc(lprod, sizeof(int));
     for (int i = 0; i < PRECISION; i++) {
         for (int j = 0; j < PRECISION; j++) {
-            prod[i+j] += a.values[i] * b.values[j];
+            prod[i+j] += a.values[PRECISION-i-1] * b.values[PRECISION-j-1];
         }
     }
 
@@ -205,7 +205,7 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     }
 
     for (int i = 0; i < lprod - clip; i++) {
-        result.values[i] = prod[i + clip];
+        result.values[PRECISION-i-1] = prod[i + clip];
     }
 
     if (negate) {
@@ -221,54 +221,8 @@ std::ostream& operator<<(std::ostream& os, const Arbitrary& a) {
 
     if (Arbitrary::sign(a) < 0) {os << "-";}
     Arbitrary abs = Arbitrary::absolute(a);
-    os << abs.values[PRECISION-1] << ".";
-    for (int i = PRECISION-2; i >= 0; i--) {os << std::setw(4) << std::setfill('0') << abs.values[i];}
+    os << abs.values[0] << ".";
+    for (int i = 1; i < PRECISION; i++) {os << std::setw(4) << std::setfill('0') << abs.values[i];}
     return os;
 
 }
-
-/*
-Arbitrary Arbitrary::reciprocal(const Arbitrary n) {
-
-    Arbitrary y = n;
-    Arbitrary z = n;
-
-    bool negate = false;
-    if (Arbitrary::sign(z) < 0) {
-        negate = true;
-        y = Arbitrary::negate(y);
-        z = Arbitrary::negate(z);
-    }
-
-    for (int i = PRECISION - 1; i > 0; i--) {
-        z.values[i] = z.values[i-1];
-    }
-    z.values[0] = 1;
-    
-    Arbitrary precision(0.000001f);
-
-    for (int i = 0; i < 20; i++) {
-        z = z * (Arbitrary(2.0f) - (y * z));
-    }
-
-    if (negate) {
-        z = Arbitrary::negate(z);
-    }
-
-    return z;
-
-}
-
-Arbitrary Arbitrary::operator/(const Arbitrary& other) {
-
-    Arbitrary a = *this;
-    Arbitrary b = Arbitrary::reciprocal(other);
-    
-    return a * b;
-
-}
-
-bool Arbitrary::operator>(const Arbitrary& other) {
-    return Arbitrary::sign(*this - other) > 0;
-}
-*/
