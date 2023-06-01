@@ -5,7 +5,7 @@
 
 namespace {
     const uint32_t BASE = 4294967295;
-    const int PRECISION = 3;
+    const int PRECISION = 4;
 }
 
 Arbitrary::Arbitrary() {
@@ -56,6 +56,13 @@ double Arbitrary::value(const Arbitrary n) {
 
     return result;
 
+}
+
+Arbitrary Arbitrary::shift(const Arbitrary n, int p) {
+    Arbitrary result = n;
+    for (int i = p+1; i <= PRECISION; i++) {result.values[i] = result.values[i-p];}
+    for (int i = 1; i <= p; i++) {result.values[i] = 0;}
+    return result;
 }
 
 void Arbitrary::operator=(const Arbitrary& other) {
@@ -140,27 +147,34 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
 
     for (int i = 0; i < PRECISION; i++) {
 
+        Arbitrary partial;
+        uint32_t carry = 0;
+
         for (int j = 0; j < PRECISION; j++) {
 
-            Arbitrary partial;
+            partial.values[PRECISION-j] = a.values[i+1] * b.values[PRECISION-j];
+            if (partial.values[PRECISION-j] + carry < partial.values[PRECISION-j]) {partial.values[PRECISION-j] += carry; carry = 1;}
+            else {partial.values[PRECISION-j] += carry; carry = 0;}
 
-            //uint32_t carry = (((double) a.values[i+1] / BASE) * (double) b.values[j+1]);
             uint32_t lower_a = a.values[i+1] & 0xFFFF;
             uint32_t upper_a = (a.values[i+1] >> 16) & 0xFFFF;
-            uint32_t lower_b = b.values[j+1] & 0xFFFF;
-            uint32_t upper_b = (b.values[j+1] >> 16) & 0xFFFF;
+            uint32_t lower_b = b.values[PRECISION-j] & 0xFFFF;
+            uint32_t upper_b = (b.values[PRECISION-j] >> 16) & 0xFFFF;
             uint32_t product_low = lower_a * lower_b;
             uint32_t product_mid = lower_a * upper_b + upper_a * lower_b;
             uint32_t product_high = upper_a * upper_b;
             product_mid += (product_low >> 16);
             product_high += (product_mid >> 16);
-            uint32_t carry = product_high;
-
-            if (i+j+1<=PRECISION) {partial.values[i+j+1] = a.values[i+1] * b.values[j+1];}
-            if (i+j>=1&&i+j<=PRECISION) {partial.values[i+j] = carry;}
-            result = result + partial;
+            carry += product_high;
 
         }
+
+        if (i > 0) {
+            partial = Arbitrary::shift(partial, i);
+            partial.values[i] = carry;
+        }
+
+        result = result + partial;
 
     }
 

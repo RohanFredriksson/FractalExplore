@@ -58,7 +58,13 @@ namespace Window {
 
 }
 
+#include <iomanip>
+
 int main() {
+
+	Arbitrary a = Arbitrary(3.14159) + Arbitrary(0.0000026535) + Arbitrary(0.000000000089793);
+	for (int i = 0; i < Arbitrary::precision(); i++) {std::cout << a.values[i+1] << " ";} std::cout << "\n";
+	std::cout << std::fixed << std::setprecision(15) << Arbitrary::value(a * a) << "\n";
 
 	// Initialise GLFW
 	if (!glfwInit()) {
@@ -150,17 +156,16 @@ int main() {
 		// Render Stage
 		if (update) {
 
-			int precision = 3;
 			int iterations = 128;
 
 			// Render the mandelbrot in black and white.
 			postprocessing->bind();
 			mandelbrot.uploadInt("uIterations", iterations);
-			mandelbrot.uploadUnsignedIntArray("uReal", precision+1, camera.x.data());
-			mandelbrot.uploadUnsignedIntArray("uImaginary", precision+1, camera.y.data());
-			mandelbrot.uploadUnsignedIntArray("uWidth", precision+1, camera.width.data());
-			mandelbrot.uploadUnsignedIntArray("uHeight", precision+1, camera.height.data());
-			mandelbrot.uploadUnsignedIntArray("uDepth", precision+1, camera.depth.data());
+			mandelbrot.uploadUnsignedIntArray("uReal", Arbitrary::precision()+1, camera.x.data());
+			mandelbrot.uploadUnsignedIntArray("uImaginary", Arbitrary::precision()+1, camera.y.data());
+			mandelbrot.uploadUnsignedIntArray("uWidth", Arbitrary::precision()+1, camera.width.data());
+			mandelbrot.uploadUnsignedIntArray("uHeight", Arbitrary::precision()+1, camera.height.data());
+			mandelbrot.uploadUnsignedIntArray("uDepth", Arbitrary::precision()+1, camera.depth.data());
 			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			renderer.render();

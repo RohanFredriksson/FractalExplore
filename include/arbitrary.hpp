@@ -16,6 +16,7 @@ class Arbitrary {
 
         static int precision();
         static double value(const Arbitrary n);
+        static Arbitrary shift(const Arbitrary n, int p);
 
         void operator=(const Arbitrary& other);
         Arbitrary operator+(const Arbitrary& other);
