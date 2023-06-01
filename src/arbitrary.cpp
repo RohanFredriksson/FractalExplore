@@ -1,11 +1,12 @@
 #include "arbitrary.hpp"
 #include <iomanip>
 #include <climits>
+#include <array>
 #include <cmath>
 
 namespace {
     const uint32_t BASE = 4294967295;
-    const int PRECISION = 4;
+    const int PRECISION = 3;
 }
 
 Arbitrary::Arbitrary() {
@@ -85,9 +86,10 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
         // Perform addition.
         uint32_t carry = 0;
         for (int i = PRECISION; i > 0; i--) {
+            uint32_t next = 0;
+            if (a.values[i] + b.values[i] < a.values[i]) {next=1;}
             result.values[i] = a.values[i] + b.values[i] + carry;
-            if (result.values[i] < std::max(a.values[i], b.values[i])) {carry = 1;}
-            else {carry = 0;}
+            carry = next;
         }
 
         // If the numbers are negative, the result is negative.
@@ -145,6 +147,54 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     Arbitrary b = other;
     Arbitrary result;
 
+    /*
+    std::array<uint32_t, 2*PRECISION-1> product;
+    for (int i = 0; i < product.size(); i++) {product[i] = 0;}
+
+    for (int i = 0; i < PRECISION; i++) {
+
+        uint32_t carry = 0;
+
+        for (int j = 0; j < PRECISION; j++) {
+
+            uint32_t next = 0;
+            uint32_t value = a.values[PRECISION-i] * b.values[PRECISION-j];
+            if (product[i+j] + value < product[i+j]) {next++;}
+            product[i+j] += value;
+            if (product[i+j] + carry < product[i+j]) {next++;}
+            product[i+j] += carry;
+
+            uint32_t lower_a = a.values[PRECISION-i] & 0xFFFF;
+            uint32_t upper_a = (a.values[PRECISION-i] >> 16) & 0xFFFF;
+            uint32_t lower_b = b.values[PRECISION-j] & 0xFFFF;
+            uint32_t upper_b = (b.values[PRECISION-j] >> 16) & 0xFFFF;
+            uint32_t product_low = lower_a * lower_b;
+            uint32_t product_mid = lower_a * upper_b + upper_a * lower_b;
+            uint32_t product_high = upper_a * upper_b;
+            product_mid += (product_low >> 16);
+            product_high += (product_mid >> 16);
+            carry = product_high + next;
+
+        }
+
+        if (i+PRECISION < 2*PRECISION-1) {
+            product[i+PRECISION] += carry;
+        }
+        
+    }
+
+    // Round to the specified precision.
+    if (product[product.size()-PRECISION] >= BASE/2) {
+        for (int i = product[product.size()-PRECISION+1]; i < product.size(); i++) {
+            if (product[i] + 1 > product[i]) {product[i]++; break;}
+            product[i]++; 
+        }
+    }
+
+    // Move the product into the arbitrary class.
+    for (int i = 0; i < PRECISION; i++) {result.values[i+1] = product[product.size()-i-1];}
+    */
+
     for (int i = 0; i < PRECISION; i++) {
 
         Arbitrary partial;
@@ -178,6 +228,7 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
 
     }
 
+    // Fix the sign.
     if ((a.values[0] == 0) != (b.values[0] == 0)) {result.values[0] = 1;}
     return result;
 

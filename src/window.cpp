@@ -58,13 +58,7 @@ namespace Window {
 
 }
 
-#include <iomanip>
-
 int main() {
-
-	Arbitrary a = Arbitrary(3.14159) + Arbitrary(0.0000026535) + Arbitrary(0.000000000089793);
-	for (int i = 0; i < Arbitrary::precision(); i++) {std::cout << a.values[i+1] << " ";} std::cout << "\n";
-	std::cout << std::fixed << std::setprecision(15) << Arbitrary::value(a * a) << "\n";
 
 	// Initialise GLFW
 	if (!glfwInit()) {
