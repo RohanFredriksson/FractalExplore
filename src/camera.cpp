@@ -5,11 +5,11 @@
 #include "window.hpp"
 
 Camera::Camera() {
-    this->x = Arbitrary(0.0f);
-    this->y = Arbitrary(0.0f);
-    this->width = Arbitrary(2.0f);
-    this->height = Arbitrary(2.0f);
-    this->depth = Arbitrary(1.0f);
+    this->x = Arbitrary(0.0);
+    this->y = Arbitrary(0.0);
+    this->width = Arbitrary(2.0);
+    this->height = Arbitrary(2.0);
+    this->depth = Arbitrary(1.0);
     this->adjust();
 }
 

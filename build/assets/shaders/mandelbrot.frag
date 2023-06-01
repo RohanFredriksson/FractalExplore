@@ -1,196 +1,81 @@
-#version 330 core
+#version 400 core
 
-#define BASE 10000
-#define MAX_PRECISION 5
-#define MAX_PRODUCT_SIZE ((MAX_PRECISION-1)*2+1)
+#define BASE 4294967295u
+#define PRECISION 3
 
 in vec2 fPosition;
 in vec2 fTexCoords;
 
-uniform int uPrecision;
 uniform int uIterations;
-
-uniform int uReal[MAX_PRECISION];
-uniform int uImaginary[MAX_PRECISION];
-uniform int uWidth[MAX_PRECISION];
-uniform int uHeight[MAX_PRECISION];
-uniform int uDepth[MAX_PRECISION];
+uniform uint uReal[PRECISION+1];
+uniform uint uImaginary[PRECISION+1];
+uniform uint uWidth[PRECISION+1];
+uniform uint uHeight[PRECISION+1];
+uniform uint uDepth[PRECISION+1];
 
 out vec4 colour;
 
-int result[MAX_PRECISION];
-
-#define zero(x, l) for(int i=0;i<l;i++){x[i]=0;}
-#define assign(x, y) for(int i=0;i<uPrecision;i++){x[i]=y[i];}
-#define negate(x) for(int i=0;i<uPrecision;i++){x[i]=-x[i];}
-#define signp(x) (x[0] >= 0)
-
-int keep, carry;
-
-void round(int x) {
-	carry = x / BASE;
-	keep = x - carry * BASE;
+uint carry(uint a, uint b) {
+    uint lower_a = a & 0xFFFF;
+    uint upper_a = (a >> 16) & 0xFFFF;
+    uint lower_b = b & 0xFFFF;
+    uint upper_b = (b >> 16) & 0xFFFF;
+    uint product_low = lower_a * lower_b;
+    uint product_mid = lower_a * upper_b + upper_a * lower_b;
+    uint product_high = upper_a * upper_b;
+    product_mid += (product_low >> 16);
+    product_high += (product_mid >> 16);
+    return product_high;
 }
 
-void add(int[MAX_PRECISION] a, int[MAX_PRECISION] b) {
+#define assign(x, y) {for(int assign_i=0;assign_i<=PRECISION;assign_i++){x[assign_i]=y[assign_i];}}
+#define zero(x) {for(int zero_i=0;zero_i<=PRECISION;zero_i++){x[zero_i]=0u;}}
+#define load(x, v) {double f=(v); if (f<0.0) {x[0]=1u; f*=-1.0;} else {x[0]=0u;} for(int load_i=1; load_i<=PRECISION; load_i++) {x[load_i]=uint(f); f-=x[load_i]; f*=BASE;}}
+#define negate(x) {x[0]=(x[0]==0u?1u:0u);}
 
-	bool s1 = signp(a);
-    bool s2 = signp(b);
-	carry = 0;
+#define add_add(a, b) {uint add_carry=0u; for(int add_i=PRECISION; add_i>0; add_i--) {add_buffer[add_i]=a[add_i]+b[add_i]+add_carry; if(add_buffer[add_i]<max(a[add_i],b[add_i])) {add_carry=1u;} else {add_carry=0u;}} if(!add_pa) {add_buffer[0]=1u;} else {add_buffer[0]=0u;}}
+#define add_sub(a, b) {uint add_borrow=0u; for(int add_i=PRECISION; add_i>0; add_i--) {add_buffer[add_i]=a[add_i]-b[add_i]-add_borrow; if(a[add_i]<b[add_i]+add_borrow) {add_borrow=1u;} else {add_borrow=0u;}}}
+#define add(a, b, r) {uint add_buffer[PRECISION+1]; bool add_pa=a[0]==0u; bool add_pb=b[0]==0u; if (add_pa==add_pb) {add_add(a, b);} else {bool add_flip=false; for(int add_i=1; add_i<=PRECISION; add_i++) {if(b[add_i]>a[add_i]) {add_flip=true; break;} if(a[add_i]>b[add_i]) {break;}} if(add_flip) {add_sub(b, a);} else {add_sub(a, b);} if(add_pa==add_flip) {add_buffer[0]=1u;} else {add_buffer[0]=0u;}} assign(r, add_buffer);}
+#define mul(a, b, r) {uint mul_buffer[PRECISION+1]; zero(mul_buffer); for(int mul_i=0; mul_i<PRECISION; mul_i++) {for (int mul_j=0; mul_j<PRECISION; mul_j++) {uint mul_partial[PRECISION+1]; zero(mul_partial); if(mul_i+mul_j+1<=PRECISION) {mul_partial[mul_i+mul_j+1]=a[mul_i+1]*b[mul_j+1];} if(mul_i+mul_j>=1&&mul_i+mul_j<=PRECISION) {mul_partial[mul_i+mul_j]=carry(a[mul_i+1], b[mul_j+1]);} add(mul_buffer, mul_partial, mul_buffer);}} if((a[0]==0u)!=(b[0]==0u)) {mul_buffer[0]=1u;}; assign(r, mul_buffer);}
 
-	for (int i = uPrecision - 1; i > 0; i--) {
-		
-        round(a[i] + b[i] + carry);
-		if (keep < 0) {
-			keep += BASE;
-			carry--;
-		}
+float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
 
-		result[i] = keep;
-
-	}
-
-	round(a[0] + b[0] + carry);
-	result[0] = keep;
-	
-	if (s1 != s2 && !signp(result)) {
-
-		negate(result);
-		carry = 0;
-
-		for (int i = uPrecision - 1; i >= 0; i--) {
-			
-            round(result[i] + carry);
-			if (keep < 0) {
-				keep += BASE;
-				carry--;
-			}
-
-			result[i] = keep;
-
-		}
-
-		negate(result);
-
-	}
-
-}
-
-void mul(int[MAX_PRECISION] a, int[MAX_PRECISION] b) {
-
-	bool flag = false;
-
-	if (!signp(a)) {
-		negate(a);
-		flag = !flag;
-	}
-
-	if (!signp(b)) {
-		negate(b);
-		flag = !flag;
-	}
-
-    int len = ((uPrecision-1)*2+1);
-	int prod[MAX_PRODUCT_SIZE];
-	zero(prod, len);
-
-	for (int i = 0; i < uPrecision; i++) {
-		for(int j = 0; j < uPrecision; j++) {
-			prod[i+j] += a[uPrecision-i-1] * b[uPrecision-j-1];
-		}
-	}
-
-	carry = 0;
-	int clip = len - uPrecision;
-	for (int i = 0; i < clip; i++) {
-		round(prod[i] + carry);
-		prod[i] = keep;
-	}
-
-	if (prod[clip-1] >= BASE/2) {
-		carry++;
-	}
-
-	for (int i = clip; i < len; i++) {
-		round(prod[i] + carry);
-		prod[i] = keep;
-	}
-
-	for (int i = 0; i < len - clip; i++) {
-		result[uPrecision-i-1] = prod[i+clip];
-	}
-
-	if (flag) {
-		negate(result);
-	}
-
-}
-
-void load(float f) {
-
-    for (int i = 0; i < uPrecision; i++) {
-        int fCurr = int(f);
-        result[i] = fCurr;
-        f -= float(fCurr);
-        f *= float(BASE);
-    }
-
-}
-
-float mandelbrot(int[MAX_PRECISION] c_r, int[MAX_PRECISION] c_i) {
-
-    int z_r[MAX_PRECISION];
-    int z_i[MAX_PRECISION];
-    zero(z_r, uPrecision);
-    zero(z_i, uPrecision);
+    uint z_r[PRECISION+1];
+    uint z_i[PRECISION+1];
+    zero(z_r);
+    zero(z_i);
     
-    int tmp[MAX_PRECISION];
-    int nz_r[MAX_PRECISION];
-    int nz_i[MAX_PRECISION];
+    uint tmp[PRECISION+1];
+    uint nz_r[PRECISION+1];
+    uint nz_i[PRECISION+1];
 
     int k = 0;
     while (k < uIterations) {
 
         // Compute c_r^2 + c_i^2
         // Pythagoras Theorem
-        int radius[MAX_PRECISION];
-        mul(z_r, z_r);
-        assign(radius, result);
-        mul(z_i, z_i);
-        assign(tmp, result);
-        add(radius, tmp);
-        assign(radius, result);
+        uint radius[PRECISION+1];
+        mul(z_r, z_r, radius);
+        mul(z_i, z_i, tmp);
+        add(radius, tmp, radius);
 
         // If we are more than 2 units away, c_r^2 + c_i^2 will be greater than 4.
-        // So if the result is negative, we keep iterating, otherwise we can bail.
-        load(-4.0);
-        assign(tmp, result);
-        add(radius, tmp);
-        assign(radius, result);
-        if (signp(radius)) {
+        if (radius[1] > 4) {
             break;
         }
 
         // Compute the real component of the square.
-        mul(z_i, z_i);
-        assign(nz_r, result);
+        mul(z_i, z_i, nz_r);
         negate(nz_r);
-        mul(z_r, z_r);
-        assign(tmp, result);
-        add(nz_r, tmp);
-        assign(nz_r, result);
-        add(nz_r, c_r);
-        assign(nz_r, result);
+        mul(z_r, z_r, tmp);
+        add(nz_r, tmp, nz_r);
+        add(nz_r, c_r, nz_r);
 
         // Compute the imaginary component of the square.
-        load(2.0);
-        assign(nz_i, result);
-        mul(nz_i, z_r);
-        assign(nz_i, result);
-        mul(nz_i, z_i);
-        assign(nz_i, result);
-        add(nz_i, c_i);
-        assign(nz_i, result);
+        load(nz_i, 2.0);
+        mul(nz_i, z_r, nz_i);
+        mul(nz_i, z_i, nz_i);
+        add(nz_i, c_i, nz_i);
 
         // Update the past values.
         assign(z_r, nz_r);
@@ -210,34 +95,23 @@ float mandelbrot(int[MAX_PRECISION] c_r, int[MAX_PRECISION] c_i) {
 
 void main() {
 
-    int tmp[MAX_PRECISION];
-    load(0.5);
-    assign(tmp, result);
+    uint half[PRECISION+1];
+    load(half, 0.5);
 
-    int c_r[MAX_PRECISION];
-    load(fPosition.x);
-    assign(c_r, result);
-    mul(c_r, uWidth);
-    assign(c_r, result);
-    mul(c_r, uDepth);
-    assign(c_r, result);
-    mul(c_r, tmp);
-    assign(c_r, result);
-    add(c_r, uReal);
-    assign(c_r, result);
+    uint c_r[PRECISION+1];
+    load(c_r, fPosition.x);
+    mul(c_r, uWidth, c_r);
+    mul(c_r, uDepth, c_r);
+    mul(c_r, half, c_r);
+    add(c_r, uReal, c_r);
 
-    int c_i[MAX_PRECISION];
-    load(fPosition.y);
-    assign(c_i, result);
-    mul(c_i, uHeight);
-    assign(c_i, result);
-    mul(c_i, uDepth);
-    assign(c_i, result);
-    mul(c_i, tmp);
-    assign(c_i, result);
-    add(c_i, uImaginary);
-    assign(c_i, result);
-
+    uint c_i[PRECISION+1];
+    load(c_i, fPosition.y);
+    mul(c_i, uHeight, c_i);
+    mul(c_i, uDepth, c_i);
+    mul(c_i, half, c_i);
+    add(c_i, uImaginary, c_i);
+    
     colour = vec4(vec3(1.0, 1.0, 1.0) * mandelbrot(c_r, c_i), 1.0);
 
 }
