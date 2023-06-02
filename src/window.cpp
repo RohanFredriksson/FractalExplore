@@ -140,13 +140,14 @@ int main() {
 				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
 			}
 
+			//for (int i = 1; i <= Arbitrary::precision(); i++) {std::cout << camera.depth.values[i] << " ";} std::cout << "\n";
 			update = true;
 		}
 
 		// Render Stage
 		if (update) {
 
-			int iterations = 128;
+			int iterations = 256;
 
 			// Render the mandelbrot in black and white.
 			postprocessing->bind();

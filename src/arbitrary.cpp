@@ -147,20 +147,24 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     Arbitrary b = other;
     Arbitrary result;
 
+    std::array<uint32_t, 2*PRECISION-1> product;
+    for (int i = 0; i < product.size(); i++) {product[i] = 0;}
+
     for (int i = 0; i < PRECISION; i++) {
 
-        Arbitrary partial;
         uint32_t carry = 0;
 
         for (int j = 0; j < PRECISION; j++) {
 
             uint32_t next = 0;
-            partial.values[PRECISION-j] = a.values[i+1] * b.values[PRECISION-j];
-            if (partial.values[PRECISION-j] + carry < partial.values[PRECISION-j]) {next++;}
-            partial.values[PRECISION-j] += carry;
+            uint32_t value = a.values[PRECISION-i] * b.values[PRECISION-j];
+            if (product[i+j] + value < product[i+j]) {next++;}
+            product[i+j] += value;
+            if (product[i+j] + carry < product[i+j]) {next++;}
+            product[i+j] += carry;
 
-            uint32_t lower_a = a.values[i+1] & 0xFFFF;
-            uint32_t upper_a = a.values[i+1] >> 16;
+            uint32_t lower_a = a.values[PRECISION-i] & 0xFFFF;
+            uint32_t upper_a = a.values[PRECISION-i] >> 16;
             uint32_t lower_b = b.values[PRECISION-j] & 0xFFFF;
             uint32_t upper_b = b.values[PRECISION-j] >> 16;
             uint32_t lower = lower_a * lower_b;
@@ -177,19 +181,26 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
             t = t << 16; 
             if (lower + t < lower) {upper++;}
 
-            next += upper;
-            carry = next;
+            carry = upper + next;
 
         }
 
-        if (i > 0) {
-            partial = Arbitrary::shift(partial, i);
-            partial.values[i] = carry;
+        if (i+PRECISION < 2*PRECISION-1) {
+            product[i+PRECISION] += carry;
         }
-
-        result = result + partial;
-
+        
     }
+
+    // Round to the specified precision.
+    if (product[PRECISION-2] >= BASE/2) {
+        for (int i = product[PRECISION-1]; i < product.size(); i++) {
+            if (product[i] + 1 > product[i]) {product[i]++; break;}
+            product[i]++; 
+        }
+    }
+
+    // Move the product into the arbitrary class.
+    for (int i = 0; i < PRECISION; i++) {result.values[i+1] = product[product.size()-i-1];}
 
     // Fix the sign.
     if ((a.values[0] == 0) != (b.values[0] == 0)) {result.values[0] = 1;}
