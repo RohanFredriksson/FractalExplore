@@ -58,24 +58,7 @@ namespace Window {
 
 }
 
-#include <climits>
-
 int main() {
-
-	/*
-	uint32_t a = UINT_MAX / 2;
-	uint32_t b = UINT_MAX;
-	uint64_t expected = (uint64_t) a * (uint64_t) b;
-
-	uint32_t lower = a * b;
-	uint32_t upper = (b * (double) a) / ((double) UINT_MAX+1);
-	uint64_t emulated = ((uint64_t) upper << 32) + lower;
-
-	std::cout << upper << "\n";
-	std::cout << expected << "\n";
-	std::cout << emulated << "\n";
-	return 0;
-	*/
 
 	// Initialise GLFW
 	if (!glfwInit()) {
@@ -163,7 +146,7 @@ int main() {
 		// Render Stage
 		if (update) {
 
-			int iterations = 64;
+			int iterations = 128;
 
 			// Render the mandelbrot in black and white.
 			postprocessing->bind();

@@ -6,7 +6,7 @@
 
 namespace {
     const double BASE = 4294967296.0;
-    const int PRECISION = 2;
+    const int PRECISION = 5;
 }
 
 Arbitrary::Arbitrary() {
@@ -153,12 +153,33 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
         uint32_t carry = 0;
 
         for (int j = 0; j < PRECISION; j++) {
+
             uint32_t next = 0;
             partial.values[PRECISION-j] = a.values[i+1] * b.values[PRECISION-j];
             if (partial.values[PRECISION-j] + carry < partial.values[PRECISION-j]) {next++;}
             partial.values[PRECISION-j] += carry;
-	        next += (uint32_t) (((double) a.values[i+1] * (double) b.values[PRECISION-j]) / BASE); // TODO FIND A BETTER WAY TO DO THIS.
+
+            uint32_t lower_a = a.values[i+1] & 0xFFFF;
+            uint32_t upper_a = a.values[i+1] >> 16;
+            uint32_t lower_b = b.values[PRECISION-j] & 0xFFFF;
+            uint32_t upper_b = b.values[PRECISION-j] >> 16;
+            uint32_t lower = lower_a * lower_b;
+	        uint32_t upper = upper_a * upper_b;
+
+            uint32_t t = lower_a * upper_b;
+            upper += t >> 16;
+            t = t << 16;
+            if (lower + t < lower) {upper++;}
+            lower += t;
+
+            t = lower_b * upper_a;
+            upper += t >> 16;
+            t = t << 16; 
+            if (lower + t < lower) {upper++;}
+
+            next += upper;
             carry = next;
+
         }
 
         if (i > 0) {
