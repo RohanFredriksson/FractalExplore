@@ -114,13 +114,13 @@ int main() {
 	float begin = (float) glfwGetTime();
 	float end = begin;
 	float dt = -1.0f;
-	
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {	
 
 		// Polling Stage
 		glfwPollEvents();
-		
+
 		// Update Stage
 		if (MouseListener::isMouseDragging()) {
 			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - (MouseListener::getWorldDx());}
@@ -131,37 +131,32 @@ int main() {
 		if (MouseListener::getScrollY() != 0.0f) {
 
 			if (MouseListener::getScrollY() > 0) {
-				camera.depth = camera.depth * Arbitrary(1.0f / 1.1f);
+				camera.depth = camera.depth * Arbitrary(1.0 / 1.1);
 				camera.x = camera.x + (MouseListener::getWorldX() - camera.x) * Arbitrary(0.0909090909f);
 				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
-			} 
-			
-			else {
-				camera.depth = camera.depth * (Arbitrary(1.1f));
+			} else {
+				camera.depth = camera.depth * (Arbitrary(1.1));
 				camera.x = camera.x - (MouseListener::getWorldX() - camera.x) * Arbitrary(0.1f);
 				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
 			}
 
-			camera.adjust();
+			//for (int i = 1; i <= Arbitrary::precision(); i++) {std::cout << camera.depth.values[i] << " ";} std::cout << "\n";
 			update = true;
-
 		}
 
 		// Render Stage
 		if (update) {
 
-			int precision = 5;
-			int iterations = 128;
+			int iterations = 256;
 
 			// Render the mandelbrot in black and white.
 			postprocessing->bind();
-			mandelbrot.uploadInt("uPrecision", precision);
 			mandelbrot.uploadInt("uIterations", iterations);
-			mandelbrot.uploadIntArray("uReal", precision, camera.x.data());
-			mandelbrot.uploadIntArray("uImaginary", precision, camera.y.data());
-			mandelbrot.uploadIntArray("uWidth", precision, camera.width.data());
-			mandelbrot.uploadIntArray("uHeight", precision, camera.height.data());
-			mandelbrot.uploadIntArray("uDepth", precision, camera.depth.data());
+			mandelbrot.uploadUnsignedIntArray("uReal", Arbitrary::precision()+1, camera.x.data());
+			mandelbrot.uploadUnsignedIntArray("uImaginary", Arbitrary::precision()+1, camera.y.data());
+			mandelbrot.uploadUnsignedIntArray("uWidth", Arbitrary::precision()+1, camera.width.data());
+			mandelbrot.uploadUnsignedIntArray("uHeight", Arbitrary::precision()+1, camera.height.data());
+			mandelbrot.uploadUnsignedIntArray("uDepth", Arbitrary::precision()+1, camera.depth.data());
 			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			renderer.render();

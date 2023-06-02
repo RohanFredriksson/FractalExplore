@@ -176,3 +176,9 @@ void Shader::uploadIntArray(string name, int num, int* array) {
     GLint location = glGetUniformLocation(this->program, name.c_str());
     glUniform1iv(location, num, array);
 }
+
+void Shader::uploadUnsignedIntArray(string name, int num, unsigned int* array) {
+    this->bind();
+    GLint location = glGetUniformLocation(this->program, name.c_str());
+    glUniform1uiv(location, num, array);
+}

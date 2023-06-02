@@ -37,5 +37,6 @@ class Shader {
         void uploadMat4(string name, mat4 matrix);
         void uploadTexture(string name, int slot);
         void uploadIntArray(string name, int num, int* array);
+        void uploadUnsignedIntArray(string name, int num, unsigned int* array);
 
 };
