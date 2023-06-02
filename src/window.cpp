@@ -58,7 +58,24 @@ namespace Window {
 
 }
 
+#include <climits>
+
 int main() {
+
+	/*
+	uint32_t a = UINT_MAX / 2;
+	uint32_t b = UINT_MAX;
+	uint64_t expected = (uint64_t) a * (uint64_t) b;
+
+	uint32_t lower = a * b;
+	uint32_t upper = (b * (double) a) / ((double) UINT_MAX+1);
+	uint64_t emulated = ((uint64_t) upper << 32) + lower;
+
+	std::cout << upper << "\n";
+	std::cout << expected << "\n";
+	std::cout << emulated << "\n";
+	return 0;
+	*/
 
 	// Initialise GLFW
 	if (!glfwInit()) {
@@ -131,26 +148,22 @@ int main() {
 		if (MouseListener::getScrollY() != 0.0f) {
 
 			if (MouseListener::getScrollY() > 0) {
-				camera.depth = camera.depth * Arbitrary(1.0f / 1.1f);
+				camera.depth = camera.depth * Arbitrary(1.0 / 1.1);
 				camera.x = camera.x + (MouseListener::getWorldX() - camera.x) * Arbitrary(0.0909090909f);
 				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
-			} 
-			
-			else {
-				camera.depth = camera.depth * (Arbitrary(1.1f));
+			} else {
+				camera.depth = camera.depth * (Arbitrary(1.1));
 				camera.x = camera.x - (MouseListener::getWorldX() - camera.x) * Arbitrary(0.1f);
 				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
 			}
 
-			camera.adjust();
 			update = true;
-
 		}
 
 		// Render Stage
 		if (update) {
 
-			int iterations = 128;
+			int iterations = 64;
 
 			// Render the mandelbrot in black and white.
 			postprocessing->bind();
