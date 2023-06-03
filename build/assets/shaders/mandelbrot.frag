@@ -16,11 +16,10 @@ in vec2 fPosition;
 in vec2 fTexCoords;
 
 uniform int uIterations;
-uniform uint uReal[PRECISION+1];
-uniform uint uImaginary[PRECISION+1];
-uniform uint uWidth[PRECISION+1];
-uniform uint uHeight[PRECISION+1];
-uniform uint uDepth[PRECISION+1];
+uniform uint uPositionX[PRECISION+1];
+uniform uint uPositionY[PRECISION+1];
+uniform uint uScaleX[PRECISION+1];
+uniform uint uScaleY[PRECISION+1];
 
 out vec4 colour;
 
@@ -39,7 +38,6 @@ float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
     while (k < uIterations) {
 
         // Compute c_r^2 + c_i^2
-        // Pythagoras Theorem
         uint radius[PRECISION+1];
         mul(z_r, z_r, radius);
         mul(z_i, z_i, tmp);
@@ -81,22 +79,15 @@ float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
 
 void main() {
 
-    uint half[PRECISION+1];
-    load(half, 0.5);
-
     uint c_r[PRECISION+1];
     load(c_r, fPosition.x);
-    mul(c_r, uWidth, c_r);
-    mul(c_r, uDepth, c_r);
-    mul(c_r, half, c_r);
-    add(c_r, uReal, c_r);
+    mul(c_r, uScaleX, c_r);
+    add(c_r, uPositionX, c_r);
 
     uint c_i[PRECISION+1];
     load(c_i, fPosition.y);
-    mul(c_i, uHeight, c_i);
-    mul(c_i, uDepth, c_i);
-    mul(c_i, half, c_i);
-    add(c_i, uImaginary, c_i);
+    mul(c_i, uScaleY, c_i);
+    add(c_i, uPositionY, c_i);
     
     colour = vec4(vec3(1.0, 1.0, 1.0) * mandelbrot(c_r, c_i), 1.0);
 
