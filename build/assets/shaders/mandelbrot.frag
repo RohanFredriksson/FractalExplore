@@ -34,8 +34,7 @@ float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
     uint nz_r[PRECISION+1];
     uint nz_i[PRECISION+1];
 
-    int k = 0;
-    while (k < uIterations) {
+    for (int k = 0; k < uIterations; k++) {
 
         // Compute c_r^2 + c_i^2
         uint radius[PRECISION+1];
@@ -45,7 +44,7 @@ float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
 
         // If we are more than 2 units away, c_r^2 + c_i^2 will be greater than 4.
         if (radius[1] > 4) {
-            break;
+            return float(k) / float(uIterations);
         }
 
         // Compute the real component of the square.
@@ -65,13 +64,6 @@ float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
         assign(z_r, nz_r);
         assign(z_i, nz_i);
 
-        // Increment the counter.
-        k++;
-
-    }
-
-    if (k < uIterations) {
-        return float(k) / float(uIterations);
     }
 
     return 0.0;
