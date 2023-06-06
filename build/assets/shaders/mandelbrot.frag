@@ -1,8 +1,9 @@
 #version 400 core
 
-#define BASE 4294967296.0
-#define HALF_BASE 2147483648u
-#define PRECISION 3
+const int PRECISION = 3;
+const int ARRAY_SIZE = (PRECISION+1);
+const float BASE = 4294967296.0;
+const uint HALF_BASE = 2147483648u;
 
 #define assign(x, y) {for(int assign_i=0;assign_i<=PRECISION;assign_i++){x[assign_i]=y[assign_i];}}
 #define zero(x) {for(int zero_i=0;zero_i<=PRECISION;zero_i++){x[zero_i]=0u;}}
@@ -16,28 +17,28 @@ in vec2 fPosition;
 in vec2 fTexCoords;
 
 uniform int uIterations;
-uniform uint uPositionX[PRECISION+1];
-uniform uint uPositionY[PRECISION+1];
-uniform uint uScaleX[PRECISION+1];
-uniform uint uScaleY[PRECISION+1];
+uniform uint uPositionX[ARRAY_SIZE];
+uniform uint uPositionY[ARRAY_SIZE];
+uniform uint uScaleX[ARRAY_SIZE];
+uniform uint uScaleY[ARRAY_SIZE];
 
 out vec4 colour;
 
-float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
+float mandelbrot(uint[ARRAY_SIZE] c_r, uint[ARRAY_SIZE] c_i) {
 
-    uint z_r[PRECISION+1];
-    uint z_i[PRECISION+1];
+    uint z_r[ARRAY_SIZE];
+    uint z_i[ARRAY_SIZE];
     zero(z_r);
     zero(z_i);
     
-    uint tmp[PRECISION+1];
-    uint nz_r[PRECISION+1];
-    uint nz_i[PRECISION+1];
+    uint tmp[ARRAY_SIZE];
+    uint nz_r[ARRAY_SIZE];
+    uint nz_i[ARRAY_SIZE];
 
     for (int k = 0; k < uIterations; k++) {
 
         // Compute c_r^2 + c_i^2
-        uint radius[PRECISION+1];
+        uint radius[ARRAY_SIZE];
         mul(z_r, z_r, radius);
         mul(z_i, z_i, tmp);
         add(radius, tmp, radius);
@@ -71,12 +72,12 @@ float mandelbrot(uint[PRECISION+1] c_r, uint[PRECISION+1] c_i) {
 
 void main() {
 
-    uint c_r[PRECISION+1];
+    uint c_r[ARRAY_SIZE];
     load(c_r, fPosition.x);
     mul(c_r, uScaleX, c_r);
     add(c_r, uPositionX, c_r);
 
-    uint c_i[PRECISION+1];
+    uint c_i[ARRAY_SIZE];
     load(c_i, fPosition.y);
     mul(c_i, uScaleY, c_i);
     add(c_i, uPositionY, c_i);
