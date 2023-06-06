@@ -140,7 +140,6 @@ int main() {
 				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
 			}
 
-			//for (int i = 1; i <= Arbitrary::precision(); i++) {std::cout << camera.depth.values[i] << " ";} std::cout << "\n";
 			update = true;
 		}
 
@@ -149,14 +148,17 @@ int main() {
 
 			int iterations = 256;
 
+			// Determine the scale factor for the shader.
+			Arbitrary w = Arbitrary(0.5f) * camera.depth * camera.width;
+			Arbitrary h = Arbitrary(0.5f) * camera.depth * camera.height;
+
 			// Render the mandelbrot in black and white.
 			postprocessing->bind();
 			mandelbrot.uploadInt("uIterations", iterations);
-			mandelbrot.uploadUnsignedIntArray("uReal", Arbitrary::precision()+1, camera.x.data());
-			mandelbrot.uploadUnsignedIntArray("uImaginary", Arbitrary::precision()+1, camera.y.data());
-			mandelbrot.uploadUnsignedIntArray("uWidth", Arbitrary::precision()+1, camera.width.data());
-			mandelbrot.uploadUnsignedIntArray("uHeight", Arbitrary::precision()+1, camera.height.data());
-			mandelbrot.uploadUnsignedIntArray("uDepth", Arbitrary::precision()+1, camera.depth.data());
+			mandelbrot.uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, camera.x.data());
+			mandelbrot.uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, camera.y.data());
+			mandelbrot.uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, w.data());
+			mandelbrot.uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, h.data());
 			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			renderer.render();
