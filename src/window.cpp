@@ -13,6 +13,9 @@
 #include "framebuffer.hpp"
 #include "renderer.hpp"
 
+#include "shaders/mandelbrot.hpp"
+#include "shaders/hsv.hpp"
+
 namespace {
 
 	GLFWwindow* window;
@@ -97,10 +100,9 @@ int main() {
 
 	// Framebuffer
 	postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
-
-	// Shaders
-	Shader mandelbrot("assets/shaders/mandelbrot.vert", "assets/shaders/mandelbrot.frag");
-	Shader hsv("assets/shaders/hsv.vert", "assets/shaders/hsv.frag");
+	
+	Shader mandelbrot(Mandelbrot::vertex, Mandelbrot::fragment);
+	Shader hsv(HSV::vertex, HSV::fragment);
 
 	// Renderer
 	Renderer renderer;

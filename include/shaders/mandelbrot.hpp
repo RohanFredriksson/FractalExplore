@@ -1,4 +1,22 @@
-#version 400 core
+#pragma once
+
+namespace Mandelbrot {
+
+const char* vertex = R"(#version 400 core
+
+layout (location=0) in vec2 aPosition;
+layout (location=1) in vec2 aTexCoords;
+
+out vec2 fPosition;
+out vec2 fTexCoords;
+
+void main() {
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+    fPosition = aPosition;
+    fTexCoords = aTexCoords;
+})";
+
+const char* fragment = R"(#version 400 core
 
 const int PRECISION = 3;
 const int ARRAY_SIZE = (PRECISION+1);
@@ -83,5 +101,7 @@ void main() {
     add(c_i, uPositionY, c_i);
     
     colour = vec4(vec3(1.0, 1.0, 1.0) * mandelbrot(c_r, c_i), 1.0);
+
+})";
 
 }
