@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 class Arbitrary {   
 
@@ -17,6 +18,7 @@ class Arbitrary {
         static int precision();
         static double value(const Arbitrary n);
         static Arbitrary shift(const Arbitrary n, int p);
+        static std::string serialise(const Arbitrary n);
 
         void operator=(const Arbitrary& other);
         Arbitrary operator+(const Arbitrary& other);

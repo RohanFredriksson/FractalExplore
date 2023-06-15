@@ -63,6 +63,10 @@ namespace Window {
 
 int main() {
 
+	Arbitrary a(3.14159265358979323846264338327950288);
+	std::string p = Arbitrary::serialise(a);
+	std::cout << p << "\n";
+
 	// Initialise GLFW
 	if (!glfwInit()) {
 		std::cout << "Unable to initialise GLFW." << std::endl;

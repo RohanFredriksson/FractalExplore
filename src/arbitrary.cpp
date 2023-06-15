@@ -1,12 +1,12 @@
 #include "arbitrary.hpp"
 #include <iomanip>
 #include <climits>
-#include <array>
 #include <cmath>
+#include <array>
 
 namespace {
     const double BASE = 4294967296.0;
-    const int PRECISION = 9;
+    const int PRECISION = 4;
 }
 
 Arbitrary::Arbitrary() {
@@ -64,6 +64,64 @@ Arbitrary Arbitrary::shift(const Arbitrary n, int p) {
     for (int i = p+1; i <= PRECISION; i++) {result.values[i] = result.values[i-p];}
     for (int i = 1; i <= p; i++) {result.values[i] = 0;}
     return result;
+}
+
+#include <iostream>
+
+std::string Arbitrary::serialise(const Arbitrary n) {
+    
+    bool sign = n.values[0] == 1;
+    uint32_t integral = n.values[1];
+
+    std::string result = "";
+    if (sign) {result = "-" + result;}
+    result = result + std::to_string(integral) + ".";
+
+    std::vector<int> fractional;
+    int length = std::ceil((PRECISION-1) * std::log10(BASE));
+    for (int i = 0; i < length; i++) {fractional.push_back(0);}
+
+    for (int i = PRECISION; i > 1; i--) {
+
+        uint32_t component = n.values[i];        
+        for (int j = 0; j < 32; j++) {
+
+            // Divide the number by 2.
+            int carry = 0;
+            for (int k = 0; k < length; k++) {
+                int next = (fractional[k] & 1) == 0 ? 0 : 1;
+                fractional[k] = (10 * carry + fractional[k]) / 2;
+                carry = next;
+            }
+
+            // Add the least significant bit to the number.
+            carry = component & 1;
+            for (int k = 0; k < length && carry != 0; k++) {
+                fractional[k] += carry;
+                carry = fractional[k] / 10;
+                fractional[k] = fractional[k] % 10;
+            }
+
+            // Find the next least significant bit.
+            component = component >> 1;
+
+        }
+
+    }
+
+    // Divide the number by 2.
+    int carry = 0;
+    for (int k = 0; k < length; k++) {
+        int next = (fractional[k] & 1) == 0 ? 0 : 1;
+        fractional[k] = (10 * carry + fractional[k]) / 2;
+        carry = next;
+    }
+
+    // Add the integer array to the string.
+    for (int k = 1; k < length; k++) {result += std::to_string(fractional[k]);}
+
+    return result;
+
 }
 
 void Arbitrary::operator=(const Arbitrary& other) {
