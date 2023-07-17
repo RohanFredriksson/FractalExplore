@@ -18,7 +18,7 @@ void main() {
 
 const char* fragment = R"(#version 400 core
 
-const int PRECISION = 3;
+const int PRECISION = 4;
 const int ARRAY_SIZE = (PRECISION+1);
 const float BASE = 4294967296.0;
 const uint HALF_BASE = 2147483648u;

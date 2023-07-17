@@ -66,8 +66,6 @@ Arbitrary Arbitrary::shift(const Arbitrary n, int p) {
     return result;
 }
 
-#include <iostream>
-
 std::string Arbitrary::serialise(const Arbitrary n) {
     
     bool sign = n.values[0] == 1;
