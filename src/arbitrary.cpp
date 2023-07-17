@@ -1,6 +1,8 @@
 #include "arbitrary.hpp"
+#include <stdexcept>
 #include <iomanip>
 #include <climits>
+#include <regex>
 #include <cmath>
 #include <array>
 
@@ -19,6 +21,11 @@ Arbitrary::Arbitrary(double value) {
     this->load(value);
 }
 
+Arbitrary::Arbitrary(std::string value) {
+    for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
+    this->load(value);
+}
+
 void Arbitrary::load(double value) {
 
     // Store the sign bit in the first element of the array.
@@ -32,6 +39,32 @@ void Arbitrary::load(double value) {
         value -= this->values[i];
         value *= BASE;
     }
+
+}
+
+void Arbitrary::load(std::string value) {
+
+    // Check if the string is of correct format.
+    std::regex pattern("^-?\\d+(\\.\\d+)?$");
+    if (!std::regex_match(value, pattern)) {throw std::invalid_argument("Numerical string required.");}
+
+    // Negate if required.
+    if (value[0] == '-') {
+        this->values[0] = 1;
+        value.erase(0, 1);
+    }
+
+    // Compute the integral component.
+
+    // Compute the fractional component.
+
+    // Load the string into a vector of ints.
+
+    // For each character in the string do the following.
+    
+    // If the first element is greater than or equal to five add a bit
+
+    // Multiply the vector of ints by 2.
 
 }
 
@@ -68,7 +101,7 @@ Arbitrary Arbitrary::shift(const Arbitrary n, int p) {
 
 std::string Arbitrary::serialise(const Arbitrary n) {
     
-    bool sign = n.values[0] == 1;
+    bool sign = n.values[0] > 0;
     uint32_t integral = n.values[1];
 
     std::string result = "";
