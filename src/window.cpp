@@ -5,6 +5,10 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include "window.hpp"
 #include "arbitrary.hpp"
 #include "camera.hpp"
@@ -102,6 +106,15 @@ int main() {
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
 
+	// Initialise ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	(void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
 	// Framebuffer
 	postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 	
@@ -149,6 +162,7 @@ int main() {
 			update = true;
 		}
 
+		/*
 		// Render Stage
 		if (update) {
 
@@ -179,6 +193,63 @@ int main() {
 			update = false;
 
 		}
+		*/
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::SetCursorPosY(-30.0f);
+    	ImGui::Text("Custom Header Content");
+
+		// Main menu bar
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                // Add menu items for File menu
+                if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+                if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+                if (ImGui::MenuItem("Quit", "Alt+F4")) { glfwSetWindowShouldClose(window, true); }
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Edit")) {
+                // Add menu items for Edit menu
+                if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
+                if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
+                if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
+                ImGui::EndMenu();
+            }
+
+            // Add more menus or buttons here if needed
+
+            ImGui::EndMainMenuBar();
+        }
+
+        static bool openRightWindow = false;
+
+		// Main window content
+		//ImGui::SetNextWindowSize(ImVec2(300, 200));
+		//ImGui::SetNextWindowPos(ImVec2(0, 20));
+		ImGui::Begin("DockSpace Window");
+		ImGui::Text("Main Window Content");
+		if (ImGui::Button("Open Right Window")) {openRightWindow = true;}
+		ImGui::End();
+
+		if (openRightWindow) {
+
+			//ImGui::SetNextWindowSize(ImVec2(300, 200));
+			//ImGui::SetNextWindowPos(ImVec2(800 - 300, 0));
+			ImGui::Begin("Secondary Window", &openRightWindow);
+			ImGui::Text("Secondary Window Content");
+			ImGui::End();
+
+        }
+
+		glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+        glClear(GL_COLOR_BUFFER_BIT);
+		ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		glfwSwapBuffers(window);
 		
 		// End Frame
 		MouseListener::endFrame();
@@ -191,6 +262,13 @@ int main() {
 
 	// Destroy the framebuffer.
 	delete postprocessing;
+
+	// Destroy imgui
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+	glfwDestroyWindow(window);
+	glfwTerminate();
 
 	// Destroy the window and GLFW.
 	glfwDestroyWindow(window);
