@@ -1,7 +1,7 @@
 #include "arbitrary.hpp"
 #include <stdexcept>
 #include <iomanip>
-#include <climits>
+#include <limits>
 #include <regex>
 #include <cmath>
 #include <array>

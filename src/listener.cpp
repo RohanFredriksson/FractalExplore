@@ -65,16 +65,6 @@ bool KeyListener::isKeyBeginDown(int key) {
     return false;
 }
 
-void WindowListener::resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
-
-    Window::setWidth(screenWidth);
-    Window::setHeight(screenHeight);
-    Window::resetFramebuffers();
-    Window::getCamera()->adjust();
-    glViewport(0, 0, screenWidth, screenHeight);
-
-}
-
 void MouseListener::calcOrthoX() {
     float currentX = ((float) x / Window::getWidth()) * 2.0f - 1.0f;
     Camera* camera = Window::getCamera();

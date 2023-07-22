@@ -26,6 +26,7 @@ namespace {
 	Camera camera;
 	Framebuffer* postprocessing;
 
+	bool update = true;
 	int width = 800;
 	int height = 800;
 	float fps = -1.0f;
@@ -63,6 +64,15 @@ namespace Window {
 		postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 	}
 
+	void resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
+		width = screenWidth;
+		height = screenHeight;
+		resetFramebuffers();
+		camera.adjust();
+		glViewport(0, 0, screenWidth, screenHeight);
+		update = true;
+	}
+
 }
 
 int main() {
@@ -92,7 +102,7 @@ int main() {
 
 	// Manage callbacks
 	glfwSetKeyCallback(window, KeyListener::keyCallback);
-	glfwSetWindowSizeCallback(window, WindowListener::resizeCallback);
+	glfwSetWindowSizeCallback(window, Window::resizeCallback);
 	glfwSetCursorPosCallback(window, MouseListener::mousePosCallback);
 	glfwSetMouseButtonCallback(window, MouseListener::mouseButtonCallback);
 	glfwSetScrollCallback(window, MouseListener::mouseScrollCallback);
@@ -126,10 +136,9 @@ int main() {
 	renderer.start();
 
 	// Call the resize callback for initialisation.
-	WindowListener::resizeCallback(window, width, height);
+	Window::resizeCallback(window, width, height);
 
 	// Loop variables
-	bool update = true;
 	float begin = (float) glfwGetTime();
 	float end = begin;
 	float dt = -1.0f;
@@ -162,11 +171,11 @@ int main() {
 			update = true;
 		}
 
-		/*
 		// Render Stage
 		if (update) {
 
-			int iterations = 256;
+			update = false;
+			int iterations = 128;
 
 			// Determine the scale factor for the shader.
 			Arbitrary w = Arbitrary(0.5f) * camera.depth * camera.width;
@@ -184,23 +193,18 @@ int main() {
 			renderer.render();
 			postprocessing->unbind();
 
-			// Apply post processing to the image.
-			hsv.uploadTexture("uTexture", 0);
-			renderer.render();
-
-			// Swap the buffer and lower the update flag.
-			glfwSwapBuffers(window);
-			update = false;
-
 		}
-		*/
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Apply post processing to the image.
+		hsv.uploadTexture("uTexture", 0);
+		renderer.render();
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		ImGui::SetCursorPosY(-30.0f);
-    	ImGui::Text("Custom Header Content");
 
 		// Main menu bar
         if (ImGui::BeginMainMenuBar()) {
@@ -225,28 +229,6 @@ int main() {
             ImGui::EndMainMenuBar();
         }
 
-        static bool openRightWindow = false;
-
-		// Main window content
-		//ImGui::SetNextWindowSize(ImVec2(300, 200));
-		//ImGui::SetNextWindowPos(ImVec2(0, 20));
-		ImGui::Begin("DockSpace Window");
-		ImGui::Text("Main Window Content");
-		if (ImGui::Button("Open Right Window")) {openRightWindow = true;}
-		ImGui::End();
-
-		if (openRightWindow) {
-
-			//ImGui::SetNextWindowSize(ImVec2(300, 200));
-			//ImGui::SetNextWindowPos(ImVec2(800 - 300, 0));
-			ImGui::Begin("Secondary Window", &openRightWindow);
-			ImGui::Text("Secondary Window Content");
-			ImGui::End();
-
-        }
-
-		glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
-        glClear(GL_COLOR_BUFFER_BIT);
 		ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
