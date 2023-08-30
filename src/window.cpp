@@ -59,15 +59,10 @@ namespace Window {
 		height = h;
 	}
 
-	void resetFramebuffers() {
-		delete postprocessing;
-		postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
-	}
-
 	void resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
 		width = screenWidth;
 		height = screenHeight;
-		resetFramebuffers();
+		postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 		camera.adjust();
 		glViewport(0, 0, screenWidth, screenHeight);
 		update = true;
@@ -125,9 +120,7 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	// Framebuffer
-	postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
-	
+	// Initialise the shaders.
 	Shader mandelbrot(Mandelbrot::vertex, Mandelbrot::fragment);
 	Shader hsv(HSV::vertex, HSV::fragment);
 
@@ -152,7 +145,7 @@ int main() {
 		// Update Stage
 		if (MouseListener::isMouseDragging()) {
 			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - (MouseListener::getWorldDx());}
-			if (MouseListener::getDy() != 0.0) {camera.y = camera.y + (MouseListener::getWorldDy());}
+			if (MouseListener::getDy() != 0.0) {camera.y = camera.y - (MouseListener::getWorldDy());}
 			update = true;
 		}
 
