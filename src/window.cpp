@@ -72,7 +72,7 @@ namespace Window {
 
 int main() {
 
-	Arbitrary a(3.14159265358979323846264338327950288);
+	Arbitrary a("3.14159265358979323846264338327950288");
 	std::string p = Arbitrary::serialise(a);
 	std::cout << p << "\n";
 
@@ -154,11 +154,11 @@ int main() {
 			if (MouseListener::getScrollY() > 0) {
 				camera.depth = camera.depth * Arbitrary(1.0 / 1.1);
 				camera.x = camera.x + (MouseListener::getWorldX() - camera.x) * Arbitrary(0.0909090909f);
-				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
+				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
 			} else {
 				camera.depth = camera.depth * (Arbitrary(1.1));
 				camera.x = camera.x - (MouseListener::getWorldX() - camera.x) * Arbitrary(0.1f);
-				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
+				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
 			}
 
 			update = true;

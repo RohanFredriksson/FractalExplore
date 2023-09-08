@@ -1,5 +1,6 @@
 #include "arbitrary.hpp"
 #include <stdexcept>
+#include <sstream>
 #include <iomanip>
 #include <limits>
 #include <regex>
@@ -54,17 +55,49 @@ void Arbitrary::load(std::string value) {
         value.erase(0, 1);
     }
 
-    // Compute the integral component.
+    // Split the string into both component strings.
+    char delimiter = '.';
+    std::stringstream ss(value);
+    std::string token;
+    std::vector<std::string> tokens;
+    while (std::getline(ss, token, delimiter)) {
+        tokens.push_back(token);
+    }
 
-    // Compute the fractional component.
+    // Compute the integral component.
+    this->values[1] = std::stoul(tokens[0]);
+
+    // Check if there is a fractional component.
+    if (tokens.size() < 2) {return;}
 
     // Load the string into a vector of ints.
+    std::vector<char> digits;
+    for (char& c : tokens[1]) {
+        digits.push_back(c-48);
+    }
 
-    // For each character in the string do the following.
-    
-    // If the first element is greater than or equal to five add a bit
+    // Compute the fractional component.
+    for (int i = 2; i <= PRECISION ; i++) {
 
-    // Multiply the vector of ints by 2.
+        uint32_t component = 0;      
+        uint32_t mask = 1 << 31;
+
+        for (int j = 0; j < 32; j++) {
+
+            // See if there is any carry in the first element.
+            if (digits[0] >= 5) {component = component | mask;}
+            mask = mask >> 1;
+
+            // Multiple the digit vector by two.
+            for (int k = 0; k < digits.size(); k++) {
+                if (k > 0 && digits[k] >= 5) {digits[k-1]++;}
+                digits[k] = (digits[k] * 2) % 10;
+            }
+
+        }
+
+        this->values[i] = component;
+    }
 
 }
 
