@@ -9,7 +9,7 @@
 
 namespace {
     const double BASE = 4294967296.0;
-    const int PRECISION = 4;
+    const int PRECISION = 16;
 }
 
 Arbitrary::Arbitrary() {

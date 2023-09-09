@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shaders/fractal.hpp"
+
 namespace Mandelbrot {
 
 const char* vertex = R"(#version 400 core
@@ -18,7 +20,7 @@ void main() {
 
 const char* fragment = R"(#version 400 core
 
-const int PRECISION = 4;
+const int PRECISION = ${PRECISION};
 const int ARRAY_SIZE = (PRECISION+1);
 const float BASE = 4294967296.0;
 const uint HALF_BASE = 2147483648u;
@@ -105,3 +107,5 @@ void main() {
 })";
 
 }
+
+REGISTER_FRACTAL(Mandelbrot, Mandelbrot::vertex, Mandelbrot::fragment);

@@ -24,16 +24,21 @@
 #include "shaders/mandelbrot.hpp"
 #include "shaders/hsv.hpp"
 
+#include "shaders/fractal.hpp"
+
 namespace {
+
+	const int max = Arbitrary::precision();
 
 	GLFWwindow* window;
 	Camera camera;
 	Framebuffer* renderbuffer = nullptr;
 	Framebuffer* savebuffer = nullptr;
-	
+
 	Shader* fractal;
 	Shader* postprocessing;
 
+	int precision = 2;
 	int iterations = 64;
 	int downsampling = 1;
 
@@ -137,7 +142,7 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Initialise the shaders.
-	Shader mandelbrot(Mandelbrot::vertex, Mandelbrot::fragment);
+	Shader* fractal = FRACTAL_FACTORY.create("Mandelbrot", precision);
 	Shader hsv(HSV::vertex, HSV::fragment);
 
 	// Renderer
@@ -194,11 +199,11 @@ int main() {
 
 			// Render the mandelbrot in black and white to the buffer.
 			renderbuffer->bind();
-			mandelbrot.uploadInt("uIterations", iterations);
-			mandelbrot.uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, camera.x.data());
-			mandelbrot.uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, camera.y.data());
-			mandelbrot.uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, w.data());
-			mandelbrot.uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, h.data());
+			fractal->uploadInt("uIterations", iterations);
+			fractal->uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, camera.x.data());
+			fractal->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, camera.y.data());
+			fractal->uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, w.data());
+			fractal->uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, h.data());
 			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			renderer.render();
@@ -273,6 +278,9 @@ int main() {
 	// Destroy the framebuffers.
 	delete renderbuffer;
 	delete savebuffer;
+
+	// Destroy the shaders.
+	delete fractal;
 
 	// Destroy imgui
 	ImGui_ImplOpenGL3_Shutdown();
