@@ -1,5 +1,9 @@
 #include <iostream>
 #include <cstdlib>
+#include <string>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -24,9 +28,17 @@ namespace {
 
 	GLFWwindow* window;
 	Camera camera;
-	Framebuffer* postprocessing;
+	Framebuffer* renderbuffer = nullptr;
+	Framebuffer* savebuffer = nullptr;
+	
+	Shader* fractal;
+	Shader* postprocessing;
+
+	int iterations = 64;
+	int downsampling = 1;
 
 	bool update = true;
+
 	int width = 800;
 	int height = 800;
 	float fps = -1.0f;
@@ -60,21 +72,25 @@ namespace Window {
 	}
 
 	void resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
+
 		width = screenWidth;
 		height = screenHeight;
-		postprocessing = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+
+		if (renderbuffer != nullptr) {delete renderbuffer;}
+		renderbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+
+		if (savebuffer != nullptr) {delete savebuffer;}
+		savebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+
 		camera.adjust();
 		glViewport(0, 0, screenWidth, screenHeight);
 		update = true;
+
 	}
 
 }
 
 int main() {
-
-	Arbitrary a("3.14159265358979323846264338327950288");
-	std::string p = Arbitrary::serialise(a);
-	std::cout << p << "\n";
 
 	// Initialise GLFW
 	if (!glfwInit()) {
@@ -170,12 +186,14 @@ int main() {
 			update = false;
 			int iterations = 128;
 
+			glViewport(0, 0, width, height);
+
 			// Determine the scale factor for the shader.
 			Arbitrary w = Arbitrary(0.5f) * camera.depth * camera.width;
 			Arbitrary h = Arbitrary(0.5f) * camera.depth * camera.height;
 
-			// Render the mandelbrot in black and white.
-			postprocessing->bind();
+			// Render the mandelbrot in black and white to the buffer.
+			renderbuffer->bind();
 			mandelbrot.uploadInt("uIterations", iterations);
 			mandelbrot.uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, camera.x.data());
 			mandelbrot.uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, camera.y.data());
@@ -184,7 +202,9 @@ int main() {
 			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			renderer.render();
-			postprocessing->unbind();
+			renderbuffer->unbind();
+
+			glViewport(0, 0, width, height);
 
 		}
 
@@ -192,9 +212,15 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Apply post processing to the image.
+		renderbuffer->getTexture()->bind();
 		hsv.uploadTexture("uTexture", 0);
+		savebuffer->bind();   				// TODO: ONLY CALL TO THE SAVE BUFFER IF THERE IS A SAVE EVENT.
+		renderer.render();    				// 
+		savebuffer->unbind(); 				//
 		renderer.render();
+		renderbuffer->getTexture()->unbind();
 
+		// Imgui
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -235,8 +261,18 @@ int main() {
 
 	}
 
-	// Destroy the framebuffer.
-	delete postprocessing;
+	// For now just to test, we will save the save buffer on close.
+	// TODO: create a save event to call these lines of code.
+	unsigned char* data = (unsigned char*) malloc(width * height * 3);
+	savebuffer->bind();
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+	savebuffer->unbind();
+	stbi_write_png("test.png", width, height, 3, data, width * 3);
+	free(data);
+
+	// Destroy the framebuffers.
+	delete renderbuffer;
+	delete savebuffer;
 
 	// Destroy imgui
 	ImGui_ImplOpenGL3_Shutdown();
