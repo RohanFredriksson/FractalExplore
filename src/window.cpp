@@ -22,6 +22,7 @@
 #include "renderer.hpp"
 
 #include "shaders/mandelbrot.hpp"
+#include "shaders/burningship.hpp"
 #include "shaders/hsv.hpp"
 
 #include "shaders/fractal.hpp"
@@ -35,8 +36,8 @@ namespace {
 	Framebuffer* renderbuffer = nullptr;
 	Framebuffer* savebuffer = nullptr;
 
-	Shader* fractal;
-	Shader* postprocessing;
+	Shader* fractal = nullptr;
+	Shader* postprocessing = nullptr;
 
 	int precision = 2;
 	int iterations = 64;
@@ -142,7 +143,7 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Initialise the shaders.
-	Shader* fractal = FRACTAL_FACTORY.create("Mandelbrot", precision);
+	fractal = FRACTAL_FACTORY.create("BurningShip", precision);
 	Shader hsv(HSV::vertex, HSV::fragment);
 
 	// Renderer
@@ -233,15 +234,26 @@ int main() {
 		// Main menu bar
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                // Add menu items for File menu
-                if (ImGui::MenuItem("Open", "Ctrl+O")) {}
                 if (ImGui::MenuItem("Save", "Ctrl+S")) {}
                 if (ImGui::MenuItem("Quit", "Alt+F4")) { glfwSetWindowShouldClose(window, true); }
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("Edit")) {
-                // Add menu items for Edit menu
+                if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
+                if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
+                if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
+                ImGui::EndMenu();
+            }
+
+			if (ImGui::BeginMenu("Fractal")) {
+                if (ImGui::MenuItem("Position", "Ctrl+X")) {}
+                if (ImGui::MenuItem("Depth", "Ctrl+C")) {}
+                if (ImGui::MenuItem("Type", "Ctrl+V")) {}
+                ImGui::EndMenu();
+            }
+
+			if (ImGui::BeginMenu("Color")) {
                 if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
                 if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
                 if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
