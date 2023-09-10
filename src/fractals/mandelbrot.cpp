@@ -1,4 +1,4 @@
-#include "fractal.hpp"
+#include "graphics/fractal.hpp"
 
 namespace Mandelbrot {
 

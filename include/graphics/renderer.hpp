@@ -1,8 +1,9 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include "shader.hpp"
-#include "framebuffer.hpp"
+
+#include "graphics/shader.hpp"
+#include "graphics/framebuffer.hpp"
 
 class Renderer {
 

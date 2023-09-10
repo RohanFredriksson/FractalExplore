@@ -15,12 +15,9 @@
 #include <imgui_impl_opengl3.h>
 
 #include "arbitrary.hpp"
-#include "shader.hpp"
-#include "framebuffer.hpp"
-#include "renderer.hpp"
+#include "graphics.hpp"
 
 #include "shaders/hsv.hpp"
-#include "fractal.hpp"
 
 class Camera {
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "framebuffer.hpp"
+#include "graphics/framebuffer.hpp"
 
 Framebuffer::Framebuffer(GLint internal, int width, int height, GLenum format, GLenum type) {
 

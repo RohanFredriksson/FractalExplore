@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "renderer.hpp"
+#include "graphics/renderer.hpp"
 
 const int POS_SIZE = 2;
 const int TEX_COORDS_SIZE = 2;

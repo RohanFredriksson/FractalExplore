@@ -1,7 +1,8 @@
 #pragma once
 
 #include <glad/glad.h>
-#include "texture.hpp"
+
+#include "graphics/texture.hpp"
 
 class Framebuffer {
 

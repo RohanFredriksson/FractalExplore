@@ -6,7 +6,7 @@
 #include <utility>
 #include <string>
 
-#include "shader.hpp"
+#include "graphics/shader.hpp"
 
 class FractalFactory {
 

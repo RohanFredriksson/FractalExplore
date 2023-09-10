@@ -1,5 +1,4 @@
-#include <iostream>
-#include "texture.hpp"
+#include "graphics/texture.hpp"
 
 Texture::Texture(GLint internal, int width, int height, GLenum format, GLenum type) {
 
