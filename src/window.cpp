@@ -21,11 +21,8 @@
 #include "framebuffer.hpp"
 #include "renderer.hpp"
 
-#include "shaders/mandelbrot.hpp"
-#include "shaders/burningship.hpp"
 #include "shaders/hsv.hpp"
-
-#include "shaders/fractal.hpp"
+#include "fractal.hpp"
 
 namespace {
 
@@ -143,7 +140,7 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Initialise the shaders.
-	fractal = FRACTAL_FACTORY.create("BurningShip", precision);
+	fractal = FRACTAL_FACTORY.create("Mandelbrot", precision);
 	Shader hsv(HSV::vertex, HSV::fragment);
 
 	// Renderer
@@ -190,7 +187,6 @@ int main() {
 		if (update) {
 
 			update = false;
-			int iterations = 128;
 
 			glViewport(0, 0, width, height);
 

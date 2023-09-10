@@ -1,8 +1,6 @@
-#pragma once
+#include "fractal.hpp"
 
-#include "shaders/fractal.hpp"
-
-namespace Mandelbrot {
+namespace BurningShip {
 
 const char* vertex = R"(#version 400 core
 
@@ -45,7 +43,7 @@ uniform uint uScaleY[ARRAY_SIZE];
 
 out vec4 colour;
 
-float mandelbrot(uint[ARRAY_SIZE] c_r, uint[ARRAY_SIZE] c_i) {
+float burningship(uint[ARRAY_SIZE] c_r, uint[ARRAY_SIZE] c_i) {
 
     uint z_r[ARRAY_SIZE];
     uint z_i[ARRAY_SIZE];
@@ -57,6 +55,10 @@ float mandelbrot(uint[ARRAY_SIZE] c_r, uint[ARRAY_SIZE] c_i) {
     uint nz_i[ARRAY_SIZE];
 
     for (int k = 0; k < uIterations; k++) {
+
+        // Take the absolute of each component.
+        abs(z_r);
+        abs(z_i);
 
         // Compute c_r^2 + c_i^2
         uint radius[ARRAY_SIZE];
@@ -103,10 +105,10 @@ void main() {
     mul(c_i, uScaleY, c_i);
     add(c_i, uPositionY, c_i);
     
-    colour = vec4(vec3(1.0, 1.0, 1.0) * mandelbrot(c_r, c_i), 1.0);
+    colour = vec4(vec3(1.0, 1.0, 1.0) * burningship(c_r, c_i), 1.0);
 
 })";
 
 }
 
-REGISTER_FRACTAL(Mandelbrot, Mandelbrot::vertex, Mandelbrot::fragment);
+REGISTER_FRACTAL(BurningShip, BurningShip::vertex, BurningShip::fragment);
