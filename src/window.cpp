@@ -66,14 +66,6 @@ namespace Window {
 		return &camera;
 	}
 
-	void setWidth(int w) {
-		width = w;
-	}
-
-	void setHeight(int h) {
-		height = h;
-	}
-
 	void resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
 
 		width = screenWidth;

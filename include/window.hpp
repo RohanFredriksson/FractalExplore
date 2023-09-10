@@ -8,9 +8,5 @@ namespace Window {
     int getHeight();
     float getAspectRatio();
     Camera* getCamera();
-
-    void setWidth(int width);
-    void setHeight(int height);
-    void resetFramebuffers();
-
+    
 };
