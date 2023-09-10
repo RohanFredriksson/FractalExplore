@@ -6,6 +6,7 @@
 #include <utility>
 #include <string>
 
+#include "util.hpp"
 #include "graphics/shader.hpp"
 
 class FractalFactory {
@@ -57,10 +58,6 @@ class Fractal {
         }
 
 };
-
-#define UNIQUE_VARIABLE_NAME() CONCATENATE(V, __COUNTER__)
-#define CONCATENATE_IMPL(x, y) x##y
-#define CONCATENATE(x, y) CONCATENATE_IMPL(x, y)
 
 #define FRACTAL_FACTORY FractalFactory::get()
 #define REGISTER_FRACTAL(Class, v, f) namespace{Fractal UNIQUE_VARIABLE_NAME()(#Class, v, f);}
