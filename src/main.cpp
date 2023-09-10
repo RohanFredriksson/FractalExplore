@@ -8,20 +8,69 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "window.hpp"
 #include "arbitrary.hpp"
-#include "camera.hpp"
 #include "shader.hpp"
 #include "framebuffer.hpp"
 #include "renderer.hpp"
 
 #include "shaders/hsv.hpp"
 #include "fractal.hpp"
+
+class Camera {
+
+    public:
+
+        Arbitrary x;
+        Arbitrary y;
+        Arbitrary width;
+        Arbitrary height;
+        Arbitrary depth;
+
+        Camera();
+        void adjust();
+
+};
+
+namespace KeyListener {
+
+    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    bool isKeyDown(int key);
+    bool isKeyDown();
+    bool isKeyBeginDown(int key);
+
+}
+
+namespace MouseListener {
+
+    void calcOrthoX();
+    void calcOrthoY();
+    void mousePosCallback(GLFWwindow* window, double xPos, double yPos);
+    void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    void mouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+    bool isMouseDown(int button);
+    bool isMouseDown();
+    bool isMouseBeginDown(int button);
+    bool hasMouseMoved();
+    bool isMouseDragging();
+    double getX();
+    double getY();
+    double getDx();
+    double getDy();
+    Arbitrary getWorldX();
+    Arbitrary getWorldY();
+    Arbitrary getWorldDx();
+    Arbitrary getWorldDy();
+    double getScrollX();
+    double getScrollY();
+    void endFrame();
+
+}
 
 namespace {
 
@@ -45,42 +94,39 @@ namespace {
 	int height = 800;
 	float fps = -1.0f;
 
-}
-
-namespace Window {
-
-	int getWidth() {
-		return width;
-	}
-
-	int getHeight() {
-		return height;
-	}
-
-	float getAspectRatio() {
+	float ratio() {
 		return (float) width / (float) height;
 	}
 
-	Camera* getCamera() {
-		return &camera;
-	}
+}
 
-	void resizeCallback(GLFWwindow* window, int screenWidth, int screenHeight) {
+Camera::Camera() {
+    this->x = Arbitrary(0.0);
+    this->y = Arbitrary(0.0);
+    this->width = Arbitrary(2.0);
+    this->height = Arbitrary(2.0);
+    this->depth = Arbitrary(1.0);
+    this->adjust();
+}
 
-		width = screenWidth;
-		height = screenHeight;
+void Camera::adjust() {
+    this->width = this->height * Arbitrary(ratio());
+}
 
-		if (renderbuffer != nullptr) {delete renderbuffer;}
-		renderbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+void resize(GLFWwindow* window, int screenWidth, int screenHeight) {
 
-		if (savebuffer != nullptr) {delete savebuffer;}
-		savebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+	width = screenWidth;
+	height = screenHeight;
 
-		camera.adjust();
-		glViewport(0, 0, screenWidth, screenHeight);
-		update = true;
+	if (renderbuffer != nullptr) {delete renderbuffer;}
+	renderbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
-	}
+	if (savebuffer != nullptr) {delete savebuffer;}
+	savebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+
+	camera.adjust();
+	glViewport(0, 0, screenWidth, screenHeight);
+	update = true;
 
 }
 
@@ -106,8 +152,8 @@ int main() {
 	}
 
 	// Manage callbacks
+	glfwSetWindowSizeCallback(window, resize);
 	glfwSetKeyCallback(window, KeyListener::keyCallback);
-	glfwSetWindowSizeCallback(window, Window::resizeCallback);
 	glfwSetCursorPosCallback(window, MouseListener::mousePosCallback);
 	glfwSetMouseButtonCallback(window, MouseListener::mouseButtonCallback);
 	glfwSetScrollCallback(window, MouseListener::mouseScrollCallback);
@@ -139,7 +185,7 @@ int main() {
 	renderer.start();
 
 	// Call the resize callback for initialisation.
-	Window::resizeCallback(window, width, height);
+	resize(window, width, height);
 
 	// Loop variables
 	float begin = (float) glfwGetTime();
