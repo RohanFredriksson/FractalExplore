@@ -17,8 +17,6 @@
 #include "arbitrary.hpp"
 #include "graphics.hpp"
 
-#include "shaders/hsv.hpp"
-
 class Camera {
 
     public:
@@ -174,8 +172,8 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Initialise the shaders.
-	fractal = FRACTAL_FACTORY.create("Mandelbrot", precision);
-	Shader hsv(HSV::vertex, HSV::fragment);
+	fractal = FRACTAL.get("Mandelbrot", precision);
+	postprocessing = POSTPROCESSING.get("Grayscale");
 
 	// Renderer
 	Renderer renderer;
@@ -249,7 +247,7 @@ int main() {
 
 		// Apply post processing to the image.
 		renderbuffer->getTexture()->bind();
-		hsv.uploadTexture("uTexture", 0);
+		postprocessing->uploadTexture("uTexture", 0);
 		savebuffer->bind();   				// TODO: ONLY CALL TO THE SAVE BUFFER IF THERE IS A SAVE EVENT.
 		renderer.render();    				// 
 		savebuffer->unbind(); 				//

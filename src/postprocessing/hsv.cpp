@@ -1,4 +1,4 @@
-#pragma once
+#include "graphics/postprocessing.hpp"
 
 namespace HSV {
 
@@ -47,3 +47,5 @@ void main() {
 })";
 
 }
+
+REGISTER_POSTPROCESSING(HSV, HSV::vertex, HSV::fragment);
