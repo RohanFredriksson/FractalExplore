@@ -83,6 +83,12 @@ namespace {
 	int iterations = 64;
 	int downsampling = 1;
 
+	bool fractalwindow = false;
+	int fractaloption = 0;
+
+	bool colorwindow = false;
+	std::string coloroption = "HSV";
+
 	bool update = true;
 
 	int width = 800;
@@ -108,10 +114,10 @@ void Camera::adjust() {
     this->width = this->height * Arbitrary(ratio());
 }
 
-void resize(GLFWwindow* window, int screenWidth, int screenHeight) {
+void resize(GLFWwindow* window, int w, int h) {
 
-	width = screenWidth;
-	height = screenHeight;
+	width = w;
+	height = h;
 
 	if (renderbuffer != nullptr) {delete renderbuffer;}
 	renderbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
@@ -120,7 +126,7 @@ void resize(GLFWwindow* window, int screenWidth, int screenHeight) {
 	savebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
 	camera.adjust();
-	glViewport(0, 0, screenWidth, screenHeight);
+	glViewport(0, 0, width, height);
 	update = true;
 
 }
@@ -174,6 +180,10 @@ int main() {
 	// Initialise the shaders.
 	fractal = FRACTAL.get("Mandelbrot", precision);
 	postprocessing = POSTPROCESSING.get("Grayscale");
+
+	// Fix the imgui options in the menus.
+	std::vector<std::string> fractals = FRACTAL.list();
+	for (int a = 0; a < fractals.size(); a++) {if (fractals[a] == "Mandelbrot") {fractaloption = a; break;}}
 
 	// Renderer
 	Renderer renderer;
@@ -263,35 +273,46 @@ int main() {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-                if (ImGui::MenuItem("Quit", "Alt+F4")) { glfwSetWindowShouldClose(window, true); }
+                if (ImGui::MenuItem("Quit", "Alt+F4")) {glfwSetWindowShouldClose(window, true);}
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
-                if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
-                if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
+            if (ImGui::BeginMenu("Configure")) {
+                if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
+                if (ImGui::MenuItem("Color", "")) {colorwindow = !colorwindow;}
                 ImGui::EndMenu();
             }
-
-			if (ImGui::BeginMenu("Fractal")) {
-                if (ImGui::MenuItem("Position", "Ctrl+X")) {}
-                if (ImGui::MenuItem("Depth", "Ctrl+C")) {}
-                if (ImGui::MenuItem("Type", "Ctrl+V")) {}
-                ImGui::EndMenu();
-            }
-
-			if (ImGui::BeginMenu("Color")) {
-                if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
-                if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
-                if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
-                ImGui::EndMenu();
-            }
-
-            // Add more menus or buttons here if needed
 
             ImGui::EndMainMenuBar();
         }
+
+		// Window to modify the fractal.
+		if (fractalwindow) {
+
+			ImGui::Begin("Fractal", &fractalwindow);
+
+			fractals = FRACTAL.list();
+			std::vector<const char*> strings; for (int a = 0; a < fractals.size(); a++) {strings.push_back(fractals[a].c_str());}
+			if (ImGui::Combo("##combo", &fractaloption, strings.data(), strings.size())) {
+				Shader* f = FRACTAL.get(fractals[fractaloption], precision);
+				if (f != nullptr) {
+					delete fractal; 
+					fractal = f;
+					update = true;
+				}
+			}
+
+			ImGui::End();
+		}
+
+		if (colorwindow) {
+
+			ImGui::Begin("Color", &colorwindow);
+			ImGui::End();
+
+		}
+
+		// Window to modify the postprocessing effects.
 
 		ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
