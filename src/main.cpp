@@ -79,7 +79,7 @@ namespace {
 	Shader* fractal = nullptr;
 	Shader* postprocessing = nullptr;
 
-	int precision = 2;
+	int precision = 1;
 	int iterations = 64;
 	int downsampling = 1;
 
@@ -178,8 +178,8 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Initialise the shaders.
-	fractal = FRACTAL.get("Mandelbrot", precision);
-	postprocessing = POSTPROCESSING.get("Grayscale");
+	fractal = FRACTAL.get("Mandelbrot", precision+1);
+	postprocessing = POSTPROCESSING.get("HSV");
 
 	// Fix the imgui options in the menus.
 	std::vector<std::string> fractals = FRACTAL.list();
@@ -243,8 +243,6 @@ int main() {
 			fractal->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, camera.y.data());
 			fractal->uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, w.data());
 			fractal->uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, h.data());
-			glClearColor(0.015625f, 0.015625f, 0.015625f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
 			renderer.render();
 			renderbuffer->unbind();
 
@@ -258,9 +256,9 @@ int main() {
 		// Apply post processing to the image.
 		renderbuffer->getTexture()->bind();
 		postprocessing->uploadTexture("uTexture", 0);
-		savebuffer->bind();   				// TODO: ONLY CALL TO THE SAVE BUFFER IF THERE IS A SAVE EVENT.
-		renderer.render();    				// 
-		savebuffer->unbind(); 				//
+		savebuffer->bind();
+		renderer.render();
+		savebuffer->unbind();
 		renderer.render();
 		renderbuffer->getTexture()->unbind();
 
@@ -293,8 +291,8 @@ int main() {
 
 			fractals = FRACTAL.list();
 			std::vector<const char*> strings; for (int a = 0; a < fractals.size(); a++) {strings.push_back(fractals[a].c_str());}
-			if (ImGui::Combo("##combo", &fractaloption, strings.data(), strings.size())) {
-				Shader* f = FRACTAL.get(fractals[fractaloption], precision);
+			if (ImGui::Combo("Fractal", &fractaloption, strings.data(), strings.size())) {
+				Shader* f = FRACTAL.get(fractals[fractaloption], precision+1);
 				if (f != nullptr) {
 					delete fractal; 
 					fractal = f;
@@ -302,17 +300,36 @@ int main() {
 				}
 			}
 
+			int next = precision;
+			ImGui::InputInt("Precision", &next);
+			if (next != precision && next > 0 && next < Arbitrary::precision()) {
+				precision = next;
+				Shader* f = FRACTAL.get(fractals[fractaloption], precision+1);
+				if (f != nullptr) {
+					delete fractal; 
+					fractal = f;
+					update = true;
+				}
+			}
+
+			next = iterations;
+			ImGui::InputInt("Iterations", &next);
+			if (next != iterations && next >= 0) {
+				iterations = next;
+				update = true;
+			}
+
 			ImGui::End();
+			
 		}
 
+		// Window to modify the postprocessing effects.
 		if (colorwindow) {
 
 			ImGui::Begin("Color", &colorwindow);
 			ImGui::End();
 
 		}
-
-		// Window to modify the postprocessing effects.
 
 		ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
