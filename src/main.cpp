@@ -69,8 +69,6 @@ namespace MouseListener {
 
 namespace {
 
-	const int max = Arbitrary::precision();
-
 	GLFWwindow* window;
 	Camera camera;
 	Framebuffer* renderbuffer = nullptr;
@@ -79,16 +77,11 @@ namespace {
 	Shader* fractal = nullptr;
 	Shader* postprocessing = nullptr;
 
-	int precision = 1;
-	int iterations = 64;
-	int downsampling = 1;
-
 	bool fractalwindow = false;
 	int fractaloption = 0;
-
-	bool colorwindow = false;
-	std::string coloroption = "HSV";
-
+	int coloroption = 0;
+	int precision = 1;
+	int iterations = 64;
 	bool update = true;
 
 	int width = 800;
@@ -184,6 +177,8 @@ int main() {
 	// Fix the imgui options in the menus.
 	std::vector<std::string> fractals = FRACTAL.list();
 	for (int a = 0; a < fractals.size(); a++) {if (fractals[a] == "Mandelbrot") {fractaloption = a; break;}}
+	std::vector<std::string> colors = POSTPROCESSING.list();
+	for (int a = 0; a < colors.size(); a++) {if (colors[a] == "HSV") {coloroption = a; break;}}
 
 	// Renderer
 	Renderer renderer;
@@ -277,7 +272,6 @@ int main() {
 
             if (ImGui::BeginMenu("Configure")) {
                 if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
-                if (ImGui::MenuItem("Color", "")) {colorwindow = !colorwindow;}
                 ImGui::EndMenu();
             }
 
@@ -296,6 +290,17 @@ int main() {
 				if (f != nullptr) {
 					delete fractal; 
 					fractal = f;
+					update = true;
+				}
+			}
+
+			colors = POSTPROCESSING.list();
+			strings.clear(); for (int a = 0; a < colors.size(); a++) {strings.push_back(colors[a].c_str());}
+			if (ImGui::Combo("Coloring", &coloroption, strings.data(), strings.size())) {
+				Shader* p = POSTPROCESSING.get(colors[coloroption]);
+				if (p != nullptr) {
+					delete postprocessing;
+					postprocessing = p;
 					update = true;
 				}
 			}
@@ -321,14 +326,6 @@ int main() {
 
 			ImGui::End();
 			
-		}
-
-		// Window to modify the postprocessing effects.
-		if (colorwindow) {
-
-			ImGui::Begin("Color", &colorwindow);
-			ImGui::End();
-
 		}
 
 		ImGui::Render();

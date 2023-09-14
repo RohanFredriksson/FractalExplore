@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <utility>
+#include <vector>
 #include <string>
 
 #include "util.hpp"
@@ -37,10 +38,12 @@ class PostProcessing {
           
         }
         
-        void list() {
+        std::vector<std::string> list() {
+            std::vector<std::string> result;
             for (const auto &creator : this->shaders) {
-                std::cout << creator.first << '\n';
+                result.push_back(creator.first);
             }
+            return result;
         }
 
 };
