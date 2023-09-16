@@ -77,7 +77,7 @@ namespace {
 	Shader* fractal = nullptr;
 	Shader* postprocessing = nullptr;
 
-	bool positionwindow = false;
+	bool locationwindow = false;
 	bool fractalwindow = false;
 	int fractaloption = 0;
 	int coloroption = 0;
@@ -201,8 +201,8 @@ int main() {
 
 		// Update Stage
 		if (MouseListener::isMouseDragging()) {
-			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - (MouseListener::getWorldDx());}
-			if (MouseListener::getDy() != 0.0) {camera.y = camera.y - (MouseListener::getWorldDy());}
+			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - MouseListener::getWorldDx();}
+			if (MouseListener::getDy() != 0.0) {camera.y = camera.y - MouseListener::getWorldDy();}
 			update = true;
 		}
 
@@ -273,7 +273,7 @@ int main() {
 
             if (ImGui::BeginMenu("Configure")) {
                 if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
-				if (ImGui::MenuItem("Position", "")) {positionwindow = !positionwindow;}
+				if (ImGui::MenuItem("Location", "")) {locationwindow = !locationwindow;}
                 ImGui::EndMenu();
             }
 
@@ -330,15 +330,15 @@ int main() {
 			
 		}
 
-		if (positionwindow) {
+		if (locationwindow) {
 
-			ImGui::Begin("Position", &positionwindow);
+			ImGui::Begin("Location", &locationwindow);
 
-			std::string next = Arbitrary::serialise(camera.x);
 			int length = Arbitrary::max_length();
 			char* buffer = (char*) malloc(length+1);
-			memcpy(buffer, next.c_str(), next.length()+1);
 
+			std::string next = Arbitrary::serialise(camera.x);
+			memcpy(buffer, next.c_str(), next.length()+1);
 			ImGui::InputText("X", buffer, length);
 			if (strcmp(buffer, next.c_str()) != 0) {
 				
@@ -349,8 +349,36 @@ int main() {
 				}
 
 			}
-			free(buffer);
 
+			// For some reason, camera.y is inverted. This is a quick fix.
+			next = Arbitrary::serialise(Arbitrary::negate(camera.y)); 
+			memcpy(buffer, next.c_str(), next.length()+1);
+			ImGui::InputText("Y", buffer, length);
+			if (strcmp(buffer, next.c_str()) != 0) {
+				
+				std::string candidate(buffer);
+				if (Arbitrary::validate(candidate)) {
+					camera.y.load(candidate);
+					Arbitrary::negate(camera.y);
+					update = true;
+				}
+
+			}
+
+			next = Arbitrary::serialise(camera.depth);
+			memcpy(buffer, next.c_str(), next.length()+1);
+			ImGui::InputText("Depth", buffer, length);
+			if (strcmp(buffer, next.c_str()) != 0) {
+				
+				std::string candidate(buffer);
+				if (Arbitrary::validate(candidate)) {
+					camera.depth.load(candidate);
+					update = true;
+				}
+
+			}
+
+			free(buffer);
 			ImGui::End();
 
 		}

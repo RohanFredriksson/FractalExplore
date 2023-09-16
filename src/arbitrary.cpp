@@ -195,6 +195,13 @@ Arbitrary Arbitrary::parse(std::string value) {
     return result;
 }
 
+Arbitrary Arbitrary::negate(Arbitrary n) {
+    Arbitrary result = n;
+    if (result.values[0] > 0) {result.values[0] = 0;}
+    else {result.values[0] = 1;}
+    return result;
+}
+
 bool Arbitrary::validate(std::string value) {
 
     // Do initial check of the string using a regex.
