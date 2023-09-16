@@ -31,7 +31,7 @@ vec3 interpolate(vec3 from, vec3 to, float start, float end, float value) {
     return mix(from, to, t);
 }
 
-vec3 Sunset(float v) {
+vec3 sunset(float v) {
     if (v <= 0.0) {return vec3(0.0, 0.0, 0.0);}
     if (v < 0.45) {return interpolate(vec3(252.0/255.0, 176.0/255.0, 69.0/255.0), vec3(252.0/255.0, 100.0/255.0, 100.0/255.0), 0.0, 0.45, v);}
     return interpolate(vec3(252.0/255.0, 100.0/255.0, 100.0/255.0), vec3(131.0/255.0, 58.0/255.0, 180.0/255.0), 0.45, 1.0, v);
@@ -39,7 +39,7 @@ vec3 Sunset(float v) {
 
 void main() {
     float value = texture(uTexture, fTexCoords).x;
-    vec3 rgb = Sunset(value);
+    vec3 rgb = sunset(value);
     colour = vec4(rgb.x, rgb.y, rgb.z, 1.0);
 })";
 
