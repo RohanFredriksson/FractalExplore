@@ -9,25 +9,25 @@
 
 namespace {
     const double BASE = 4294967296.0;
-    const int PRECISION = 16;
+    const int PRECISION = 4;
 }
 
 Arbitrary::Arbitrary() {
-    for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
     this->load(0.0f);
 }
 
 Arbitrary::Arbitrary(double value) {
-    for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
     this->load(value);
 }
 
 Arbitrary::Arbitrary(std::string value) {
-    for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
     this->load(value);
 }
 
 void Arbitrary::load(double value) {
+
+    // Reset the number.
+    for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
 
     // Store the sign bit in the first element of the array.
     if (value < 0.0f) {this->values[0] = 1;}
@@ -46,8 +46,10 @@ void Arbitrary::load(double value) {
 void Arbitrary::load(std::string value) {
 
     // Check if the string is of correct format.
-    std::regex pattern("^-?\\d+(\\.\\d+)?$");
-    if (!std::regex_match(value, pattern)) {throw std::invalid_argument("Numerical string required.");}
+    if (!Arbitrary::validate(value)) {throw std::invalid_argument("Invalid string.");}
+
+    // Reset the number.
+    for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
 
     // Negate if required.
     if (value[0] == '-') {
@@ -186,6 +188,42 @@ std::string Arbitrary::serialise(const Arbitrary n) {
 
     return result;
 
+}
+
+Arbitrary Arbitrary::parse(std::string value) {
+    Arbitrary result(value);
+    return result;
+}
+
+bool Arbitrary::validate(std::string value) {
+
+    // Do initial check of the string using a regex.
+    int integral_length = std::ceil(std::log10(BASE));
+    int fractional_length = std::ceil((PRECISION-1) * std::log10(BASE));
+    std::regex pattern("^-?\\d{1," + std::to_string(integral_length) + "}(\\.\\d{0," + std::to_string(fractional_length) + "})?$");
+    if (!std::regex_match(value, pattern)) {return false;}
+    
+    // Check whether the integral component fits.
+
+    // Disregard the negation.
+    if (value[0] == '-') {value.erase(0, 1);}
+
+    // Split the string into both component strings.
+    char delimiter = '.';
+    std::stringstream ss(value);
+    std::string token;
+    std::vector<std::string> tokens;
+    while (std::getline(ss, token, delimiter)) {tokens.push_back(token);}
+
+    // Store the integer in an unsigned long long and check if it is larger than unsigned long max.
+    if (std::stoull(tokens[0]) > std::numeric_limits<uint32_t>::max()) {return false;}
+
+    return true;
+
+}
+
+int Arbitrary::max_length() {
+    return 2 + std::ceil(std::log10(BASE)) + std::ceil((PRECISION-1) * std::log10(BASE));
 }
 
 void Arbitrary::operator=(const Arbitrary& other) {

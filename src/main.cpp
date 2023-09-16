@@ -77,6 +77,7 @@ namespace {
 	Shader* fractal = nullptr;
 	Shader* postprocessing = nullptr;
 
+	bool positionwindow = false;
 	bool fractalwindow = false;
 	int fractaloption = 0;
 	int coloroption = 0;
@@ -272,6 +273,7 @@ int main() {
 
             if (ImGui::BeginMenu("Configure")) {
                 if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
+				if (ImGui::MenuItem("Position", "")) {positionwindow = !positionwindow;}
                 ImGui::EndMenu();
             }
 
@@ -327,6 +329,32 @@ int main() {
 			ImGui::End();
 			
 		}
+
+		if (positionwindow) {
+
+			ImGui::Begin("Position", &positionwindow);
+
+			std::string next = Arbitrary::serialise(camera.x);
+			int length = Arbitrary::max_length();
+			char* buffer = (char*) malloc(length+1);
+			memcpy(buffer, next.c_str(), next.length()+1);
+
+			ImGui::InputText("X", buffer, length);
+			if (strcmp(buffer, next.c_str()) != 0) {
+				
+				std::string candidate(buffer);
+				if (Arbitrary::validate(candidate)) {
+					camera.x.load(candidate);
+					update = true;
+				}
+
+			}
+			free(buffer);
+
+			ImGui::End();
+
+		}
+
 
 		ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
