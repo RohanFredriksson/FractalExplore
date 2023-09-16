@@ -77,7 +77,7 @@ namespace {
 	Shader* fractal = nullptr;
 	Shader* postprocessing = nullptr;
 
-	bool locationwindow = false;
+	bool locationwindow = true;
 	bool fractalwindow = false;
 	int fractaloption = 0;
 	int coloroption = 0;
@@ -236,7 +236,7 @@ int main() {
 			renderbuffer->bind();
 			fractal->uploadInt("uIterations", iterations);
 			fractal->uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, camera.x.data());
-			fractal->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, camera.y.data());
+			fractal->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, Arbitrary::negate(camera.y).data());
 			fractal->uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, w.data());
 			fractal->uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, h.data());
 			renderer.render();
@@ -350,8 +350,7 @@ int main() {
 
 			}
 
-			// For some reason, camera.y is inverted. This is a quick fix.
-			next = Arbitrary::serialise(Arbitrary::negate(camera.y)); 
+			next = Arbitrary::serialise(camera.y); 
 			memcpy(buffer, next.c_str(), next.length()+1);
 			ImGui::InputText("Y", buffer, length);
 			if (strcmp(buffer, next.c_str()) != 0) {
@@ -359,7 +358,6 @@ int main() {
 				std::string candidate(buffer);
 				if (Arbitrary::validate(candidate)) {
 					camera.y.load(candidate);
-					Arbitrary::negate(camera.y);
 					update = true;
 				}
 
@@ -403,6 +401,7 @@ int main() {
 	savebuffer->bind();
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
 	savebuffer->unbind();
+	stbi_flip_vertically_on_write(1);
 	stbi_write_png("test.png", width, height, 3, data, width * 3);
 	free(data);
 
@@ -496,7 +495,7 @@ void MouseListener::calcOrthoX() {
 
 void MouseListener::calcOrthoY() {
     float currentY = ((float) y / height) * 2.0f - 1.0f;
-    worldY = camera.y + Arbitrary(0.5f * currentY) * (camera.height * camera.depth);
+    worldY = camera.y + Arbitrary(-0.5f * currentY) * (camera.height * camera.depth);
 }
 
 void MouseListener::mousePosCallback(GLFWwindow* window, double xPos, double yPos) {

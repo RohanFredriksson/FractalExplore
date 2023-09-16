@@ -9,7 +9,7 @@
 
 namespace {
     const double BASE = 4294967296.0;
-    const int PRECISION = 4;
+    const int PRECISION = 8;
 }
 
 Arbitrary::Arbitrary() {
@@ -195,7 +195,7 @@ Arbitrary Arbitrary::parse(std::string value) {
     return result;
 }
 
-Arbitrary Arbitrary::negate(Arbitrary n) {
+Arbitrary Arbitrary::negate(const Arbitrary n) {
     Arbitrary result = n;
     if (result.values[0] > 0) {result.values[0] = 0;}
     else {result.values[0] = 1;}
