@@ -1,6 +1,6 @@
-#include "graphics/postprocessing.hpp"
+#include "graphics/colormap.hpp"
 
-namespace Grayscale {
+namespace GrayscaleCode {
 
 const char* vertex = R"(
 #version 400 core
@@ -33,4 +33,18 @@ void main() {
 
 }
 
-REGISTER_POSTPROCESSING(Grayscale, Grayscale::vertex, Grayscale::fragment);
+class Grayscale : public ColormapProgram {
+
+    public:
+
+        std::string vertex() override {
+            return std::string(GrayscaleCode::vertex);
+        }
+
+        std::string fragment() override {
+            return std::string(GrayscaleCode::fragment);
+        }
+
+};
+
+REGISTER_SHADER_PROGRAM(Colormap, Grayscale);

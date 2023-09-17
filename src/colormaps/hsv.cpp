@@ -1,6 +1,6 @@
-#include "graphics/postprocessing.hpp"
+#include "graphics/colormap.hpp"
 
-namespace HSV {
+namespace HSVCode {
 
 const char* vertex = R"(
 #version 400 core
@@ -48,4 +48,18 @@ void main() {
 
 }
 
-REGISTER_POSTPROCESSING(HSV, HSV::vertex, HSV::fragment);
+class HSV : public ColormapProgram {
+
+    public:
+
+        std::string vertex() override {
+            return std::string(HSVCode::vertex);
+        }
+
+        std::string fragment() override {
+            return std::string(HSVCode::fragment);
+        }
+
+};
+
+REGISTER_SHADER_PROGRAM(Colormap, HSV);

@@ -1,6 +1,6 @@
-#include "graphics/postprocessing.hpp"
+#include "graphics/colormap.hpp"
 
-namespace Sunset {
+namespace SunsetCode {
 
 const char* vertex = R"(
 #version 400 core
@@ -45,4 +45,18 @@ void main() {
 
 }
 
-REGISTER_POSTPROCESSING(Sunset, Sunset::vertex, Sunset::fragment);
+class Sunset : public ColormapProgram {
+
+    public:
+
+        std::string vertex() override {
+            return std::string(SunsetCode::vertex);
+        }
+
+        std::string fragment() override {
+            return std::string(SunsetCode::fragment);
+        }
+
+};
+
+REGISTER_SHADER_PROGRAM(Colormap, Sunset);

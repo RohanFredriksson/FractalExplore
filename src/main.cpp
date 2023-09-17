@@ -28,11 +28,15 @@ namespace {
 	Framebuffer* savebuffer = nullptr;
 
 	ShaderProgram* fractal = nullptr;
-	Shader* postprocessing = nullptr;
+	ShaderProgram* colormap = nullptr;
+	//Shader* postprocessing = nullptr;
 
 	bool camerawindow = false;
+
 	bool fractalwindow = false;
 	int fractaloption = 0;
+
+	bool postprocessingwindow = false;
 	int coloroption = 0;
 
 	bool flag = true;
@@ -133,10 +137,10 @@ int main() {
 	fractal = ShaderProgramPool::get().get("Fractal", "Mandelbrot");
 	std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
 	for (int a = 0; a < names.size(); a++) {if (names[a] == "Mandelbrot") {fractaloption = a; break;}}
-
-	postprocessing = POSTPROCESSING.get("HSV");
-	std::vector<std::string> colors = POSTPROCESSING.list();
-	for (int a = 0; a < colors.size(); a++) {if (colors[a] == "HSV") {coloroption = a; break;}}
+	
+	colormap = ShaderProgramPool::get().get("Colormap", "HSV");
+	names = ShaderProgramPool::get().names("Colormap");
+	for (int a = 0; a < names.size(); a++) {if (names[a] == "HSV") {coloroption = a; break;}}
 
 	// Renderer
 	Renderer renderer;
@@ -204,7 +208,7 @@ int main() {
 
 		// Apply post processing to the image.
 		renderbuffer->getTexture()->bind();
-		postprocessing->uploadTexture("uTexture", 0);
+		colormap->upload();
 		savebuffer->bind();
 		renderer.render();
 		savebuffer->unbind();
@@ -226,7 +230,8 @@ int main() {
 
             if (ImGui::BeginMenu("Configure")) {
                 if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
-				if (ImGui::MenuItem("Location", "")) {camerawindow = !camerawindow;}
+				if (ImGui::MenuItem("Camera", "")) {camerawindow = !camerawindow;}
+				if (ImGui::MenuItem("Postprocessing", "")) {postprocessingwindow = !postprocessingwindow;}
                 ImGui::EndMenu();
             }
 
@@ -237,6 +242,7 @@ int main() {
 		if (fractalwindow) {
 
 			ImGui::Begin("Fractal", &fractalwindow);
+
 			std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
 			std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
 			if (ImGui::Combo("Fractal", &fractaloption, strings.data(), strings.size())) {
@@ -252,7 +258,7 @@ int main() {
 
 		if (camerawindow) {
 
-			ImGui::Begin("Location", &camerawindow);
+			ImGui::Begin("Camera", &camerawindow);
 
 			int length = Arbitrary::max_length();
 			char* buffer = (char*) malloc(length+1);
@@ -297,6 +303,21 @@ int main() {
 			}
 
 			free(buffer);
+			ImGui::End();
+
+		}
+
+		if (postprocessingwindow) {
+
+			ImGui::Begin("Postprocessing", &postprocessingwindow);
+
+			std::vector<std::string> names = ShaderProgramPool::get().names("Colormap");
+			std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
+			if (ImGui::Combo("Colormap", &coloroption, strings.data(), strings.size())) {
+				ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
+				if (p != nullptr) {colormap = p; flag = true;}
+			}
+
 			ImGui::End();
 
 		}
