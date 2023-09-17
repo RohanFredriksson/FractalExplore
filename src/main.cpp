@@ -127,6 +127,11 @@ void resize(GLFWwindow* window, int w, int h) {
 
 int main() {
 
+	std::vector<ShaderProgram*> programs = ShaderProgramPool::get().list("Fractal");
+	for (ShaderProgram* program : programs) {
+		std::cout << program->getName() << "\n";
+	}
+
 	// Initialise GLFW
 	if (!glfwInit()) {
 		std::cout << "Unable to initialise GLFW." << std::endl;

@@ -1,7 +1,11 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <unordered_map>
 #include <glm/glm.hpp>
+
+#include "util.hpp"
 
 class Shader {
 
@@ -27,3 +31,106 @@ class Shader {
         void uploadUnsignedIntArray(std::string name, int num, unsigned int* array);
 
 };
+
+class ShaderProgram {
+
+    private:
+
+        std::string name;
+        std::string type;
+
+    public:
+
+        std::string getName() {
+            return this->name;
+        }
+
+        std::string getType() {
+            return this->type;
+        }
+
+        void setName(std::string name) {
+            this->name = name;
+        } 
+
+        void setType(std::string type) {
+            this->type = type;
+        }
+
+        virtual std::string vertex() {
+            return "";
+        }
+
+        virtual std::string fragment() {
+            return "";
+        }
+        
+};
+
+class ShaderProgramPool {
+
+    private:
+        std::unordered_map<std::string, std::unordered_map<std::string, ShaderProgram*>> programs;
+
+    public:
+
+        static ShaderProgramPool& get() {
+            static ShaderProgramPool instance;
+            return instance;
+        }
+
+        void add(std::string type, std::string name, ShaderProgram* program) {
+
+            program->setName(name);
+            program->setType(type);
+
+            const auto search = this->programs.find(type);
+            if (search == this->programs.end()) {
+                std::unordered_map<std::string, ShaderProgram*> pool;
+                pool.insert({name, program});
+                this->programs.insert({type, pool});
+            } else {
+                search->second.insert({name, program});
+            }
+
+        }
+
+        ShaderProgram* get(std::string type, std::string name) {
+
+            const auto search = this->programs.find(type);
+            if (search == this->programs.end()) {return nullptr;}
+
+            const auto it = search->second.find(name);
+            if (it == search->second.end()) {return nullptr;}
+
+            return it->second;
+
+        }
+
+        std::vector<ShaderProgram*> list(std::string type) {
+
+            std::vector<ShaderProgram*> result;
+            const auto search = this->programs.find(type);
+            if (search == this->programs.end()) {return result;}
+            for (const auto &it : search->second) {
+                result.push_back(it.second);
+            }
+
+            return result;
+
+        }
+
+};
+
+class ShaderProgramCreator {
+
+    public:
+
+        explicit ShaderProgramCreator(std::string type, std::string name, ShaderProgram* program) {
+            ShaderProgramPool::get().add(type, name, program);
+        }
+
+};
+
+#define SHADER_PROGRAM_POOL ShaderProgramPool::get()
+#define REGISTER_SHADER_PROGRAM(Type, Class) namespace{ShaderProgramCreator UNIQUE_VARIABLE_NAME()(#Type, #Class, new Class());}
