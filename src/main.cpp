@@ -229,9 +229,9 @@ int main() {
             }
 
             if (ImGui::BeginMenu("Configure")) {
-                if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
-				if (ImGui::MenuItem("Camera", "")) {camerawindow = !camerawindow;}
-				if (ImGui::MenuItem("PostProcessing", "")) {postprocessingwindow = !postprocessingwindow;}
+                if (ImGui::MenuItem("Fractal", (fractalwindow ? "+": "-"))) {fractalwindow = !fractalwindow;}
+				if (ImGui::MenuItem("Camera", (camerawindow ? "+": "-"))) {camerawindow = !camerawindow;}
+				if (ImGui::MenuItem("PostProcessing", (postprocessingwindow ? "+": "-"))) {postprocessingwindow = !postprocessingwindow;}
                 ImGui::EndMenu();
             }
 
@@ -242,7 +242,10 @@ int main() {
 		// TODO MAKE THIS EVEN BETTER.
 		// If the side window opened.
 		if (!before && after) {
-			std::cout << "OPENED\n"; 
+			
+			//Arbitrary unitsPerPixel = Camera::getWidth() / ;
+
+
 			glfwSetWindowSize(window, Window::width() + 300, Window::height());
 		}
 

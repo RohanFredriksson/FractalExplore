@@ -205,6 +205,30 @@ Arbitrary Arbitrary::negate(const Arbitrary n) {
     return result;
 }
 
+Arbitrary Arbitrary::reciprocal(const Arbitrary n) {
+
+    Arbitrary y = n;
+    Arbitrary z = n;
+
+    bool negate = false;
+    if (n.values[0] > 0) {
+        negate = true;
+        y.values[0] = 0;
+        z.values[0] = 0;
+    }
+
+    for (int i = PRECISION; i > 1; i--) {z.values[i] = z.values[i-1];}
+    z.values[1] = 0; 
+
+    for (int i = 0; i < 100; i++) {
+        z = z * (Arbitrary(2.0) - (y * z));
+    }
+
+    if (negate) {z.values[0] = 1;}
+    return z;
+
+}
+
 bool Arbitrary::validate(const std::string value) {
 
     // Create a copy of the string to test on.
@@ -293,7 +317,7 @@ Arbitrary Arbitrary::operator+(const Arbitrary& other) {
         uint32_t borrow = 0;
         for (int i = PRECISION; i > 0; i--) {
             result.values[i] = a.values[i] - b.values[i] - borrow;
-            if (a.values[i] < b.values[i] + borrow) {borrow = 1;} 
+            if (a.values[i] < b.values[i] || a.values[i] < b.values[i] + borrow) {borrow = 1;} 
             else {borrow = 0;}
         }
 
@@ -378,5 +402,14 @@ Arbitrary Arbitrary::operator*(const Arbitrary& other) {
     // Fix the sign.
     if ((a.values[0] == 0) != (b.values[0] == 0)) {result.values[0] = 1;}
     return result;
+
+}
+
+Arbitrary Arbitrary::operator/(const Arbitrary& other) {
+
+    Arbitrary a = *this;
+    Arbitrary b = Arbitrary::reciprocal(other);
+    
+    return a * b;
 
 }

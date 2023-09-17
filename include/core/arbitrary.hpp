@@ -23,6 +23,7 @@ class Arbitrary {
         static std::string serialise(const Arbitrary n);
         static Arbitrary parse(const std::string value);
         static Arbitrary negate(const Arbitrary n);
+        static Arbitrary reciprocal(const Arbitrary n);
         static bool validate(const std::string value);
         static int max_length();
 
@@ -30,6 +31,7 @@ class Arbitrary {
         Arbitrary operator+(const Arbitrary& other);
         Arbitrary operator-(const Arbitrary& other);
         Arbitrary operator*(const Arbitrary& other);
+        Arbitrary operator/(const Arbitrary& other);
 
         //friend std::ostream& operator<<(std::ostream& os, const Arbitrary& a);
         
