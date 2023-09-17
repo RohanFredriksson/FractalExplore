@@ -29,7 +29,6 @@ namespace {
 
 	ShaderProgram* fractal = nullptr;
 	ShaderProgram* colormap = nullptr;
-	//Shader* postprocessing = nullptr;
 
 	bool camerawindow = false;
 
@@ -98,7 +97,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create the window
-	window = glfwCreateWindow(w, h, "Fractal Explore", NULL, NULL);
+	window = glfwCreateWindow(Window::width(), Window::height(), "Fractal Explore", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -147,7 +146,7 @@ int main() {
 	renderer.start();
 
 	// Call the resize callback for initialisation.
-	resize(window, w, h);
+	resize(window, Window::width(), Window::height());
 
 	// Loop variables
 	float begin = (float) glfwGetTime();
@@ -187,7 +186,7 @@ int main() {
 
 			flag = false;
 
-			glViewport(0, 0, w, h);
+			glViewport(0, 0, Window::width(), Window::height());
 
 			// Determine the scale factor for the shader.
 			Arbitrary width = Arbitrary(0.5f) * Camera::getDepth() * Camera::getWidth();
@@ -199,7 +198,7 @@ int main() {
 			renderer.render();
 			renderbuffer->unbind();
 
-			glViewport(0, 0, w, h);
+			glViewport(0, 0, Window::width(), Window::height());
 
 		}
 
@@ -221,6 +220,7 @@ int main() {
 		ImGui::NewFrame();
 
 		// Main menu bar
+		bool before = fractalwindow || camerawindow || postprocessingwindow;
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Save", "Ctrl+S")) {}
@@ -237,91 +237,105 @@ int main() {
 
             ImGui::EndMainMenuBar();
         }
+		bool after = fractalwindow || camerawindow || postprocessingwindow;
+		
+		// TODO MAKE THIS EVEN BETTER.
+		// If the side window opened.
+		if (!before && after) {
+			std::cout << "OPENED\n"; 
+			glfwSetWindowSize(window, Window::width() + 300, Window::height());
+		}
 
-		// Window to modify the fractal.
-		if (fractalwindow) {
+		// If the side window closed.
+		else if (before && !after) {
+			std::cout << "CLOSED\n";
+			glfwSetWindowSize(window, Window::width() - 300, Window::height());
+		}
 
-			ImGui::Begin("Fractal", &fractalwindow);
+		if (fractalwindow || camerawindow || postprocessingwindow) {
 
-			std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
-			std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-			if (ImGui::Combo("Fractal", &fractaloption, strings.data(), strings.size())) {
-				ShaderProgram* p = ShaderProgramPool::get().get("Fractal", names[fractaloption]);
-				if (p != nullptr) {fractal = p; flag = true;}
-			}
-
-			if (fractal != nullptr) {fractal->imgui();}
-
-			ImGui::End();
+			ImGui::SetNextWindowSize(ImVec2(300, Window::height()));
+			ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 300, 18), ImGuiCond_Always);
+			ImGui::Begin("#Configure", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 			
-		}
+			// Fractal Properties
+			ImGui::Spacing();
+            if (fractalwindow && ImGui::CollapsingHeader("Fractal", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-		if (camerawindow) {
+				std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
+				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
+				if (ImGui::Combo("Type", &fractaloption, strings.data(), strings.size())) {
+					ShaderProgram* p = ShaderProgramPool::get().get("Fractal", names[fractaloption]);
+					if (p != nullptr) {fractal = p; flag = true;}
+				}
+				if (fractal != nullptr) {fractal->imgui();}
 
-			ImGui::Begin("Camera", &camerawindow);
+            }
+			
+			// Camera Properties
+			ImGui::Spacing();
+			if (camerawindow && ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-			int length = Arbitrary::max_length();
-			char* buffer = (char*) malloc(length+1);
+				int length = Arbitrary::max_length();
+				char* buffer = (char*) malloc(length+1);
 
-			std::string next = Arbitrary::serialise(Camera::getX());
-			memcpy(buffer, next.c_str(), next.length()+1);
-			ImGui::InputText("X", buffer, length);
-			if (strcmp(buffer, next.c_str()) != 0) {
-				
-				std::string candidate(buffer);
-				if (Arbitrary::validate(candidate)) {
-					Camera::setX(Arbitrary(candidate));
-					flag = true;
+				std::string next = Arbitrary::serialise(Camera::getX());
+				memcpy(buffer, next.c_str(), next.length()+1);
+				ImGui::InputText("X", buffer, length);
+				if (strcmp(buffer, next.c_str()) != 0) {
+					
+					std::string candidate(buffer);
+					if (Arbitrary::validate(candidate)) {
+						Camera::setX(Arbitrary(candidate));
+						flag = true;
+					}
+
+				}
+
+				next = Arbitrary::serialise(Camera::getY()); 
+				memcpy(buffer, next.c_str(), next.length()+1);
+				ImGui::InputText("Y", buffer, length);
+				if (strcmp(buffer, next.c_str()) != 0) {
+					
+					std::string candidate(buffer);
+					if (Arbitrary::validate(candidate)) {
+						Camera::setY(Arbitrary(candidate));
+						flag = true;
+					}
+
+				}
+
+				next = Arbitrary::serialise(Camera::getDepth());
+				memcpy(buffer, next.c_str(), next.length()+1);
+				ImGui::InputText("Depth", buffer, length);
+				if (strcmp(buffer, next.c_str()) != 0) {
+					
+					std::string candidate(buffer);
+					if (Arbitrary::validate(candidate)) {
+						Camera::setDepth(Arbitrary(candidate));
+						flag = true;
+					}
+
+				}
+
+				free(buffer);
+			}
+
+			// Postprocessing Properties
+			ImGui::Spacing();
+			if (postprocessingwindow && ImGui::CollapsingHeader("PostProcessing", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				std::vector<std::string> names = ShaderProgramPool::get().names("Colormap");
+				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
+				if (ImGui::Combo("Color", &coloroption, strings.data(), strings.size())) {
+					ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
+					if (p != nullptr) {colormap = p; flag = true;}
 				}
 
 			}
 
-			next = Arbitrary::serialise(Camera::getY()); 
-			memcpy(buffer, next.c_str(), next.length()+1);
-			ImGui::InputText("Y", buffer, length);
-			if (strcmp(buffer, next.c_str()) != 0) {
-				
-				std::string candidate(buffer);
-				if (Arbitrary::validate(candidate)) {
-					Camera::setY(Arbitrary(candidate));
-					flag = true;
-				}
-
-			}
-
-			next = Arbitrary::serialise(Camera::getDepth());
-			memcpy(buffer, next.c_str(), next.length()+1);
-			ImGui::InputText("Depth", buffer, length);
-			if (strcmp(buffer, next.c_str()) != 0) {
-				
-				std::string candidate(buffer);
-				if (Arbitrary::validate(candidate)) {
-					Camera::setDepth(Arbitrary(candidate));
-					flag = true;
-				}
-
-			}
-
-			free(buffer);
 			ImGui::End();
-
 		}
-
-		if (postprocessingwindow) {
-
-			ImGui::Begin("PostProcessing", &postprocessingwindow);
-
-			std::vector<std::string> names = ShaderProgramPool::get().names("Colormap");
-			std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-			if (ImGui::Combo("Color", &coloroption, strings.data(), strings.size())) {
-				ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
-				if (p != nullptr) {colormap = p; flag = true;}
-			}
-
-			ImGui::End();
-
-		}
-
 
 		ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -340,10 +354,10 @@ int main() {
 	// TODO: create a save event to call these lines of code.
 	unsigned char* data = (unsigned char*) malloc(w * h * 3);
 	savebuffer->bind();
-	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glReadPixels(0, 0, Window::width(), Window::height(), GL_RGB, GL_UNSIGNED_BYTE, data);
 	savebuffer->unbind();
 	stbi_flip_vertically_on_write(1);
-	stbi_write_png("test.png", w, h, 3, data, w * 3);
+	stbi_write_png("test.png", Window::width(), Window::height(), 3, data, Window::width() * 3);
 	free(data);
 
 	// Destroy the framebuffers.
