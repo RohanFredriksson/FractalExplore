@@ -120,6 +120,9 @@ int main() {
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
 
+	// Set minimum size limits
+	glfwSetWindowSizeLimits(window, 400, 400, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
 	// Initialise the camera
 	Camera::init();
 
