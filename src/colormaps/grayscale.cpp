@@ -24,11 +24,11 @@ in vec2 fTexCoords;
 
 uniform sampler2D uTexture;
 
-out vec4 color;
+out vec3 color;
 
 void main() {
     float value = texture(uTexture, fTexCoords).x;
-    color = vec4(value, value, value, 1.0);
+    color = vec3(value, value, value);
 })";
 
 }

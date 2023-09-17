@@ -24,7 +24,7 @@ in vec2 fTexCoords;
 
 uniform sampler2D uTexture;
 
-out vec4 color;
+out vec3 color;
 
 vec3 interpolate(vec3 from, vec3 to, float start, float end, float value) {
     float t = clamp((value - start) / (end - start), 0.0, 1.0);
@@ -39,8 +39,7 @@ vec3 sunset(float v) {
 
 void main() {
     float value = texture(uTexture, fTexCoords).x;
-    vec3 rgb = sunset(value);
-    color = vec4(rgb.x, rgb.y, rgb.z, 1.0);
+    color = sunset(value);
 })";
 
 }

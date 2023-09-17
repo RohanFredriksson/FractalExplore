@@ -24,7 +24,7 @@ in vec2 fTexCoords;
 
 uniform sampler2D uTexture;
 
-out vec4 color;
+out vec3 color;
 
 vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -36,12 +36,12 @@ void main() {
 
     float value = texture(uTexture, fTexCoords).x;
     if (value == 0.0) {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
+        color = vec3(0.0, 0.0, 0.0);
     } 
     
     else {
         vec3 rgb = hsv2rgb(vec3(value, 1.0, 1.0));
-        color = vec4(rgb.x, rgb.y, rgb.z, 1.0);
+        color = vec3(rgb.x, rgb.y, rgb.z);
     }
     
 })";

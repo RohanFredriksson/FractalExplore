@@ -231,7 +231,7 @@ int main() {
             if (ImGui::BeginMenu("Configure")) {
                 if (ImGui::MenuItem("Fractal", "")) {fractalwindow = !fractalwindow;}
 				if (ImGui::MenuItem("Camera", "")) {camerawindow = !camerawindow;}
-				if (ImGui::MenuItem("Postprocessing", "")) {postprocessingwindow = !postprocessingwindow;}
+				if (ImGui::MenuItem("PostProcessing", "")) {postprocessingwindow = !postprocessingwindow;}
                 ImGui::EndMenu();
             }
 
@@ -309,11 +309,11 @@ int main() {
 
 		if (postprocessingwindow) {
 
-			ImGui::Begin("Postprocessing", &postprocessingwindow);
+			ImGui::Begin("PostProcessing", &postprocessingwindow);
 
 			std::vector<std::string> names = ShaderProgramPool::get().names("Colormap");
 			std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-			if (ImGui::Combo("Colormap", &coloroption, strings.data(), strings.size())) {
+			if (ImGui::Combo("Color", &coloroption, strings.data(), strings.size())) {
 				ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
 				if (p != nullptr) {colormap = p; flag = true;}
 			}

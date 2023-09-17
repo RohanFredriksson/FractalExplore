@@ -41,7 +41,7 @@ uniform uint uPositionY[ARRAY_SIZE];
 uniform uint uScaleX[ARRAY_SIZE];
 uniform uint uScaleY[ARRAY_SIZE];
 
-out vec4 color;
+out vec3 color;
 
 float mandelbrot(uint[ARRAY_SIZE] c_r, uint[ARRAY_SIZE] c_i) {
 
@@ -101,7 +101,7 @@ void main() {
     mul(c_i, uScaleY, c_i);
     add(c_i, uPositionY, c_i);
     
-    color = vec4(vec3(1.0, 1.0, 1.0) * mandelbrot(c_r, c_i), 1.0);
+    color = vec3(1.0, 1.0, 1.0) * mandelbrot(c_r, c_i);
 
 })";
 
