@@ -239,19 +239,17 @@ int main() {
         }
 		bool after = fractalwindow || camerawindow || postprocessingwindow;
 		
-		// TODO MAKE THIS EVEN BETTER.
 		// If the side window opened.
 		if (!before && after) {
-			
-			//Arbitrary unitsPerPixel = Camera::getWidth() / ;
-
-
+			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::width());
+			Camera::setX(Camera::getX() + dx);
 			glfwSetWindowSize(window, Window::width() + 300, Window::height());
 		}
 
 		// If the side window closed.
 		else if (before && !after) {
-			std::cout << "CLOSED\n";
+			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::width());
+			Camera::setX(Camera::getX() - dx);
 			glfwSetWindowSize(window, Window::width() - 300, Window::height());
 		}
 
