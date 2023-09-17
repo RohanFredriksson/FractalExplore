@@ -1,4 +1,4 @@
-#include "arbitrary.hpp"
+#include "core/arbitrary.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <iomanip>
@@ -43,23 +43,26 @@ void Arbitrary::load(double value) {
 
 }
 
-void Arbitrary::load(std::string value) {
+void Arbitrary::load(const std::string value) {
 
     // Check if the string is of correct format.
     if (!Arbitrary::validate(value)) {throw std::invalid_argument("Invalid string.");}
+
+    // Copy the string.
+    std::string copy = value;
 
     // Reset the number.
     for (int i = 0; i <= PRECISION; i++) {this->values.push_back(0);}
 
     // Negate if required.
-    if (value[0] == '-') {
+    if (copy[0] == '-') {
         this->values[0] = 1;
-        value.erase(0, 1);
+        copy.erase(0, 1);
     }
 
     // Split the string into both component strings.
     char delimiter = '.';
-    std::stringstream ss(value);
+    std::stringstream ss(copy);
     std::string token;
     std::vector<std::string> tokens;
     while (std::getline(ss, token, delimiter)) {
@@ -190,7 +193,7 @@ std::string Arbitrary::serialise(const Arbitrary n) {
 
 }
 
-Arbitrary Arbitrary::parse(std::string value) {
+Arbitrary Arbitrary::parse(const std::string value) {
     Arbitrary result(value);
     return result;
 }
@@ -202,22 +205,25 @@ Arbitrary Arbitrary::negate(const Arbitrary n) {
     return result;
 }
 
-bool Arbitrary::validate(std::string value) {
+bool Arbitrary::validate(const std::string value) {
+
+    // Create a copy of the string to test on.
+    std::string copy = value;
 
     // Do initial check of the string using a regex.
     int integral_length = std::ceil(std::log10(BASE));
     int fractional_length = std::ceil((PRECISION-1) * std::log10(BASE));
     std::regex pattern("^-?\\d{1," + std::to_string(integral_length) + "}(\\.\\d{0," + std::to_string(fractional_length) + "})?$");
-    if (!std::regex_match(value, pattern)) {return false;}
+    if (!std::regex_match(copy, pattern)) {return false;}
     
     // Check whether the integral component fits.
 
     // Disregard the negation.
-    if (value[0] == '-') {value.erase(0, 1);}
+    if (copy[0] == '-') {copy.erase(0, 1);}
 
     // Split the string into both component strings.
     char delimiter = '.';
-    std::stringstream ss(value);
+    std::stringstream ss(copy);
     std::string token;
     std::vector<std::string> tokens;
     while (std::getline(ss, token, delimiter)) {tokens.push_back(token);}

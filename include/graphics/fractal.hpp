@@ -1,69 +1,68 @@
 #pragma once
 
-#include <unordered_map>
-#include <functional>
-#include <iostream>
-#include <utility>
-#include <vector>
-#include <string>
+#include <imgui.h>
 
 #include "util.hpp"
+#include "core/window.hpp"
+#include "core/camera.hpp"
+#include "core/arbitrary.hpp"
 #include "graphics/shader.hpp"
 
-class Fractal {
+class FractalProgram : public ShaderProgram {
 
     private:
-        std::unordered_map<std::string, std::pair<const char*, const char*>> shaders;
+
+        int precision = 1;
+        int iterations = 64;
 
     public:
 
-        static Fractal& getInstance() {
-            static Fractal instance;
-            return instance;
-        }
+        void compile() override {
 
-        void add(std::string name, const char* vertex, const char* fragment) {
-            this->shaders.insert({name, std::make_pair(vertex, fragment)});
-        }
+            if (this->program != nullptr) {delete this->program;}
 
-        Shader* get(std::string name, int precision) {
+            std::string v = this->vertex();
+            std::string f = this->fragment();
 
-            const auto it = this->shaders.find(name);
-            if (it == this->shaders.end()) {return nullptr;}
-        
-            std::string v(it->second.first);
-            std::string f(it->second.second);
-            
             std::string search = "${PRECISION}";
             size_t position = f.find(search);
-            if (position != std::string::npos) {f.replace(position, search.length(), std::to_string(precision));}
+            if (position != std::string::npos) {f.replace(position, search.length(), std::to_string(this->precision+1));}
 
-            return new Shader(v, f);
-          
-        }
-        
-        std::vector<std::string> list() {
+            this->program = new Shader(v, f);
+
+        } 
+
+        void upload() override {
             
-            std::vector<std::string> result;
-            for (const auto &creator : this->shaders) {
-                result.push_back(creator.first);
-            }
+            Shader* s = this->getShader();
+            Arbitrary width = Arbitrary(0.5f) * Camera::getDepth() * Camera::getWidth();
+			Arbitrary height = Arbitrary(0.5f) * Camera::getDepth() * Camera::getHeight();
+        
+			s->uploadInt("uIterations", this->iterations);
+			s->uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, Camera::getX().data());
+			s->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, Arbitrary::negate(Camera::getY()).data());
+			s->uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, width.data());
+			s->uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, height.data());
 
-            return result;
+        }
+
+        void imgui() override {
+
+            int next = this->precision;
+			ImGui::InputInt("Precision", &next);
+			if (next != precision && next > 0 && next < Arbitrary::precision()) {
+				this->precision = next;
+				this->compile();
+                Window::update();
+			}
+
+			next = this->iterations;
+			ImGui::InputInt("Iterations", &next);
+			if (next != iterations && next >= 0) {
+				this->iterations = next;
+				Window::update();
+			}
 
         }
 
 };
-
-class FractalLoader {
-
-    public:
-
-        explicit FractalLoader(std::string name, const char* vertex, const char* fragment) {
-            Fractal::getInstance().add(name, vertex, fragment);
-        }
-
-};
-
-#define FRACTAL Fractal::getInstance()
-#define REGISTER_FRACTAL(n, v, f) namespace{FractalLoader UNIQUE_VARIABLE_NAME()(#n, v, f);}

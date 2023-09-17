@@ -1,6 +1,6 @@
 #include "graphics/fractal.hpp"
 
-namespace Mandelbrot {
+namespace MandelbrotCode {
 
 const char* vertex = R"(#version 400 core
 
@@ -107,4 +107,18 @@ void main() {
 
 }
 
-REGISTER_FRACTAL(Mandelbrot, Mandelbrot::vertex, Mandelbrot::fragment);
+class Mandelbrot : public FractalProgram {
+
+    public:
+
+        std::string vertex() override {
+            return std::string(MandelbrotCode::vertex);
+        }
+
+        std::string fragment() override {
+            return std::string(MandelbrotCode::fragment);
+        }
+
+};
+
+REGISTER_SHADER_PROGRAM(Fractal, Mandelbrot);

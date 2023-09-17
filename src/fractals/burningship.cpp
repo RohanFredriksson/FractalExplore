@@ -1,6 +1,6 @@
 #include "graphics/fractal.hpp"
 
-namespace BurningShip {
+namespace BurningShipCode {
 
 const char* vertex = R"(#version 400 core
 
@@ -111,4 +111,18 @@ void main() {
 
 }
 
-REGISTER_FRACTAL(BurningShip, BurningShip::vertex, BurningShip::fragment);
+class BurningShip : public FractalProgram {
+
+    public:
+
+        std::string vertex() override {
+            return std::string(BurningShipCode::vertex);
+        }
+
+        std::string fragment() override {
+            return std::string(BurningShipCode::fragment);
+        }
+
+};
+
+REGISTER_SHADER_PROGRAM(Fractal, BurningShip);

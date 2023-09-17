@@ -34,10 +34,11 @@ class Shader {
 
 class ShaderProgram {
 
-    private:
+    protected:
 
-        std::string name;
-        std::string type;
+        std::string name = "";
+        std::string type = "";
+        Shader* program = nullptr;
 
     public:
 
@@ -49,6 +50,11 @@ class ShaderProgram {
             return this->type;
         }
 
+        Shader* getShader() {
+            if (this->program == nullptr) {this->compile();}
+            return this->program;
+        }
+
         void setName(std::string name) {
             this->name = name;
         } 
@@ -56,13 +62,26 @@ class ShaderProgram {
         void setType(std::string type) {
             this->type = type;
         }
-
+        
         virtual std::string vertex() {
             return "";
         }
 
         virtual std::string fragment() {
             return "";
+        }
+
+        virtual void compile() {
+            if (this->program != nullptr) {delete this->program;}
+            this->program = new Shader(this->vertex(), this->fragment());
+        }
+
+        virtual void upload() {
+
+        }
+
+        virtual void imgui() {
+
         }
         
 };
@@ -107,7 +126,20 @@ class ShaderProgramPool {
 
         }
 
-        std::vector<ShaderProgram*> list(std::string type) {
+        std::vector<std::string> names(std::string type) {
+
+            std::vector<std::string> result;
+            const auto search = this->programs.find(type);
+            if (search == this->programs.end()) {return result;}
+            for (const auto &it : search->second) {
+                result.push_back(it.first);
+            }
+
+            return result;
+
+        }
+
+        std::vector<ShaderProgram*> shaders(std::string type) {
 
             std::vector<ShaderProgram*> result;
             const auto search = this->programs.find(type);

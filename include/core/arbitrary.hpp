@@ -12,18 +12,18 @@ class Arbitrary {
 
         Arbitrary();
         Arbitrary(double value);
-        Arbitrary(std::string value);
+        Arbitrary(const std::string value);
         void load(double value);
-        void load(std::string value);
+        void load(const std::string value);
         uint32_t* data();
 
         static int precision();
         static double value(const Arbitrary n);
         static Arbitrary shift(const Arbitrary n, int p);
         static std::string serialise(const Arbitrary n);
-        static Arbitrary parse(std::string value);
+        static Arbitrary parse(const std::string value);
         static Arbitrary negate(const Arbitrary n);
-        static bool validate(std::string value);
+        static bool validate(const std::string value);
         static int max_length();
 
         void operator=(const Arbitrary& other);

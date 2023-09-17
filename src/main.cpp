@@ -14,23 +14,10 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "arbitrary.hpp"
+#include "core/arbitrary.hpp"
+#include "core/window.hpp"
+#include "core/camera.hpp"
 #include "graphics.hpp"
-
-class Camera {
-
-    public:
-
-        Arbitrary x;
-        Arbitrary y;
-        Arbitrary width;
-        Arbitrary height;
-        Arbitrary depth;
-
-        Camera();
-        void adjust();
-
-};
 
 namespace KeyListener {
 
@@ -70,11 +57,10 @@ namespace MouseListener {
 namespace {
 
 	GLFWwindow* window;
-	Camera camera;
 	Framebuffer* renderbuffer = nullptr;
 	Framebuffer* savebuffer = nullptr;
 
-	Shader* fractal = nullptr;
+	ShaderProgram* fractal = nullptr;
 	Shader* postprocessing = nullptr;
 
 	bool locationwindow = true;
@@ -83,35 +69,38 @@ namespace {
 	int coloroption = 0;
 	int precision = 1;
 	int iterations = 64;
-	bool update = true;
+	bool flag = true;
 
-	int width = 800;
-	int height = 800;
+	int w = 800;
+    int h = 800;
 	float fps = -1.0f;
 
+}
+
+namespace Window {
+
+	int width() {
+		return w;
+	}
+
+	int height() {
+		return h;
+	}
+
 	float ratio() {
-		return (float) width / (float) height;
+		return (float) w / (float) h;
+	}
+
+	void update() {
+		flag = true;
 	}
 
 }
 
-Camera::Camera() {
-    this->x = Arbitrary(0.0);
-    this->y = Arbitrary(0.0);
-    this->width = Arbitrary(2.0);
-    this->height = Arbitrary(2.0);
-    this->depth = Arbitrary(1.0);
-    this->adjust();
-}
+void resize(GLFWwindow* window, int width, int height) {
 
-void Camera::adjust() {
-    this->width = this->height * Arbitrary(ratio());
-}
-
-void resize(GLFWwindow* window, int w, int h) {
-
-	width = w;
-	height = h;
+	w = width;
+	h = height;
 
 	if (renderbuffer != nullptr) {delete renderbuffer;}
 	renderbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
@@ -119,18 +108,13 @@ void resize(GLFWwindow* window, int w, int h) {
 	if (savebuffer != nullptr) {delete savebuffer;}
 	savebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
-	camera.adjust();
+	Camera::adjust();
 	glViewport(0, 0, width, height);
-	update = true;
+	flag = true;
 
 }
 
 int main() {
-
-	std::vector<ShaderProgram*> programs = ShaderProgramPool::get().list("Fractal");
-	for (ShaderProgram* program : programs) {
-		std::cout << program->getName() << "\n";
-	}
 
 	// Initialise GLFW
 	if (!glfwInit()) {
@@ -144,7 +128,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create the window
-	window = glfwCreateWindow(width, height, "Fractal Explore", NULL, NULL);
+	window = glfwCreateWindow(w, h, "Fractal Explore", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -167,6 +151,9 @@ int main() {
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
 
+	// Initialise the camera
+	Camera::init();
+
 	// Initialise ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -176,13 +163,12 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	// Initialise the shaders.
-	fractal = FRACTAL.get("Mandelbrot", precision+1);
-	postprocessing = POSTPROCESSING.get("HSV");
+	// Initialise the shader programs
+	fractal = ShaderProgramPool::get().get("Fractal", "Mandelbrot");
+	std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
+	for (int a = 0; a < names.size(); a++) {if (names[a] == "Mandelbrot") {fractaloption = a; break;}}
 
-	// Fix the imgui options in the menus.
-	std::vector<std::string> fractals = FRACTAL.list();
-	for (int a = 0; a < fractals.size(); a++) {if (fractals[a] == "Mandelbrot") {fractaloption = a; break;}}
+	postprocessing = POSTPROCESSING.get("HSV");
 	std::vector<std::string> colors = POSTPROCESSING.list();
 	for (int a = 0; a < colors.size(); a++) {if (colors[a] == "HSV") {coloroption = a; break;}}
 
@@ -191,7 +177,7 @@ int main() {
 	renderer.start();
 
 	// Call the resize callback for initialisation.
-	resize(window, width, height);
+	resize(window, w, h);
 
 	// Loop variables
 	float begin = (float) glfwGetTime();
@@ -206,48 +192,44 @@ int main() {
 
 		// Update Stage
 		if (MouseListener::isMouseDragging()) {
-			if (MouseListener::getDx() != 0.0) {camera.x = camera.x - MouseListener::getWorldDx();}
-			if (MouseListener::getDy() != 0.0) {camera.y = camera.y - MouseListener::getWorldDy();}
-			update = true;
+			if (MouseListener::getDx() != 0.0) {Camera::setX(Camera::getX() - MouseListener::getWorldDx());}
+			if (MouseListener::getDy() != 0.0) {Camera::setY(Camera::getY() - MouseListener::getWorldDy());}
+			flag = true;
 		}
 
 		if (MouseListener::getScrollY() != 0.0f) {
 
 			if (MouseListener::getScrollY() > 0) {
-				camera.depth = camera.depth * Arbitrary(1.0 / 1.1);
-				camera.x = camera.x + (MouseListener::getWorldX() - camera.x) * Arbitrary(0.0909090909f);
-				camera.y = camera.y + (MouseListener::getWorldY() - camera.y) * Arbitrary(0.0909090909f);
+				Camera::setDepth(Camera::getDepth() * Arbitrary(1.0 / 1.1));
+				Camera::setX(Camera::getX() + (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(0.0909090909f));
+				Camera::setY(Camera::getY() + (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(0.0909090909f));
 			} else {
-				camera.depth = camera.depth * (Arbitrary(1.1));
-				camera.x = camera.x - (MouseListener::getWorldX() - camera.x) * Arbitrary(0.1f);
-				camera.y = camera.y - (MouseListener::getWorldY() - camera.y) * Arbitrary(0.1f);
+				Camera::setDepth(Camera::getDepth() * (Arbitrary(1.1)));
+				Camera::setX(Camera::getX() - (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(0.1f));
+				Camera::setY(Camera::getY() - (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(0.1f));
 			}
 
-			update = true;
+			flag = true;
 		}
 
 		// Render Stage
-		if (update) {
+		if (flag) {
 
-			update = false;
+			flag = false;
 
-			glViewport(0, 0, width, height);
+			glViewport(0, 0, w, h);
 
 			// Determine the scale factor for the shader.
-			Arbitrary w = Arbitrary(0.5f) * camera.depth * camera.width;
-			Arbitrary h = Arbitrary(0.5f) * camera.depth * camera.height;
+			Arbitrary width = Arbitrary(0.5f) * Camera::getDepth() * Camera::getWidth();
+			Arbitrary height = Arbitrary(0.5f) * Camera::getDepth() * Camera::getHeight();
 
-			// Render the mandelbrot in black and white to the buffer.
+			// Render the fractal in black and white to the buffer.
 			renderbuffer->bind();
-			fractal->uploadInt("uIterations", iterations);
-			fractal->uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, camera.x.data());
-			fractal->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, Arbitrary::negate(camera.y).data());
-			fractal->uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, w.data());
-			fractal->uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, h.data());
+			fractal->upload();
 			renderer.render();
 			renderbuffer->unbind();
 
-			glViewport(0, 0, width, height);
+			glViewport(0, 0, w, h);
 
 		}
 
@@ -289,47 +271,14 @@ int main() {
 		if (fractalwindow) {
 
 			ImGui::Begin("Fractal", &fractalwindow);
-
-			fractals = FRACTAL.list();
-			std::vector<const char*> strings; for (int a = 0; a < fractals.size(); a++) {strings.push_back(fractals[a].c_str());}
+			std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
+			std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
 			if (ImGui::Combo("Fractal", &fractaloption, strings.data(), strings.size())) {
-				Shader* f = FRACTAL.get(fractals[fractaloption], precision+1);
-				if (f != nullptr) {
-					delete fractal; 
-					fractal = f;
-					update = true;
-				}
+				ShaderProgram* p = ShaderProgramPool::get().get("Fractal", names[fractaloption]);
+				if (p != nullptr) {fractal = p; flag = true;}
 			}
 
-			colors = POSTPROCESSING.list();
-			strings.clear(); for (int a = 0; a < colors.size(); a++) {strings.push_back(colors[a].c_str());}
-			if (ImGui::Combo("Coloring", &coloroption, strings.data(), strings.size())) {
-				Shader* p = POSTPROCESSING.get(colors[coloroption]);
-				if (p != nullptr) {
-					delete postprocessing;
-					postprocessing = p;
-					update = true;
-				}
-			}
-
-			int next = precision;
-			ImGui::InputInt("Precision", &next);
-			if (next != precision && next > 0 && next < Arbitrary::precision()) {
-				precision = next;
-				Shader* f = FRACTAL.get(fractals[fractaloption], precision+1);
-				if (f != nullptr) {
-					delete fractal; 
-					fractal = f;
-					update = true;
-				}
-			}
-
-			next = iterations;
-			ImGui::InputInt("Iterations", &next);
-			if (next != iterations && next >= 0) {
-				iterations = next;
-				update = true;
-			}
+			if (fractal != nullptr) {fractal->imgui();}
 
 			ImGui::End();
 			
@@ -342,41 +291,41 @@ int main() {
 			int length = Arbitrary::max_length();
 			char* buffer = (char*) malloc(length+1);
 
-			std::string next = Arbitrary::serialise(camera.x);
+			std::string next = Arbitrary::serialise(Camera::getX());
 			memcpy(buffer, next.c_str(), next.length()+1);
 			ImGui::InputText("X", buffer, length);
 			if (strcmp(buffer, next.c_str()) != 0) {
 				
 				std::string candidate(buffer);
 				if (Arbitrary::validate(candidate)) {
-					camera.x.load(candidate);
-					update = true;
+					Camera::setX(Arbitrary(candidate));
+					flag = true;
 				}
 
 			}
 
-			next = Arbitrary::serialise(camera.y); 
+			next = Arbitrary::serialise(Camera::getY()); 
 			memcpy(buffer, next.c_str(), next.length()+1);
 			ImGui::InputText("Y", buffer, length);
 			if (strcmp(buffer, next.c_str()) != 0) {
 				
 				std::string candidate(buffer);
 				if (Arbitrary::validate(candidate)) {
-					camera.y.load(candidate);
-					update = true;
+					Camera::setY(Arbitrary(candidate));
+					flag = true;
 				}
 
 			}
 
-			next = Arbitrary::serialise(camera.depth);
+			next = Arbitrary::serialise(Camera::getDepth());
 			memcpy(buffer, next.c_str(), next.length()+1);
 			ImGui::InputText("Depth", buffer, length);
 			if (strcmp(buffer, next.c_str()) != 0) {
 				
 				std::string candidate(buffer);
 				if (Arbitrary::validate(candidate)) {
-					camera.depth.load(candidate);
-					update = true;
+					Camera::setDepth(Arbitrary(candidate));
+					flag = true;
 				}
 
 			}
@@ -402,12 +351,12 @@ int main() {
 
 	// For now just to test, we will save the save buffer on close.
 	// TODO: create a save event to call these lines of code.
-	unsigned char* data = (unsigned char*) malloc(width * height * 3);
+	unsigned char* data = (unsigned char*) malloc(w * h * 3);
 	savebuffer->bind();
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
 	savebuffer->unbind();
 	stbi_flip_vertically_on_write(1);
-	stbi_write_png("test.png", width, height, 3, data, width * 3);
+	stbi_write_png("test.png", w, h, 3, data, w * 3);
 	free(data);
 
 	// Destroy the framebuffers.
@@ -494,13 +443,13 @@ bool KeyListener::isKeyBeginDown(int key) {
 }
 
 void MouseListener::calcOrthoX() {
-    float currentX = ((float) x / width) * 2.0f - 1.0f;
-    worldX = camera.x + Arbitrary(0.5f * currentX) * (camera.width * camera.depth);
+    float currentX = ((float) x / w) * 2.0f - 1.0f;
+    worldX = Camera::getX() + Arbitrary(0.5f * currentX) * (Camera::getWidth() * Camera::getDepth());
 }
 
 void MouseListener::calcOrthoY() {
-    float currentY = ((float) y / height) * 2.0f - 1.0f;
-    worldY = camera.y + Arbitrary(-0.5f * currentY) * (camera.height * camera.depth);
+    float currentY = ((float) y / h) * 2.0f - 1.0f;
+    worldY = Camera::getY() + Arbitrary(-0.5f * currentY) * (Camera::getHeight() * Camera::getDepth());
 }
 
 void MouseListener::mousePosCallback(GLFWwindow* window, double xPos, double yPos) {
