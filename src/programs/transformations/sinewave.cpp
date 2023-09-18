@@ -1,4 +1,5 @@
 #include "programs/transformation.hpp"
+#include <cmath>
 
 namespace SineWaveCode {
 
@@ -30,7 +31,7 @@ out vec3 color;
 
 void main() {
     float value = texture(uTexture, fTexCoords).x;
-    if (value != 0.0) {value = mod(value + uPhase, 1.0); value = 0.5 * sin(uFrequency * value) + 0.5;}
+    if (value != 0.0) {value = 0.5 * sin(uFrequency * (value + uPhase)) + 0.5;}
     color = vec3(value, value, value);
 })";
 
@@ -40,7 +41,7 @@ class SineWave: public TransformationProgram {
 
     private:
 
-        float frequency = 3.1415926535f;
+        float frequency = 1.0f;
         float phase = 0.0f;
 
     public:
@@ -62,8 +63,8 @@ class SineWave: public TransformationProgram {
 
         void imgui() override {
             this->TransformationProgram::imgui();
-            ImGui::InputFloat("Frequency", &this->frequency);
-            ImGui::InputFloat("Phase", &this->phase);
+            ImGui::SliderFloat("Frequency", &this->frequency, -16.0f, 16.0f);
+            ImGui::SliderFloat("Phase", &this->phase, -M_PI / this->frequency, M_PI / this->frequency);
         }
 
 };

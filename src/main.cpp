@@ -280,6 +280,9 @@ int main() {
 			ImGui::Spacing();
             if (fractalwindow && ImGui::CollapsingHeader("Fractal", ImGuiTreeNodeFlags_DefaultOpen)) {
 
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Text("Fractal");
 				std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
 				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
 				if (ImGui::Combo("Type", &fractaloption, strings.data(), strings.size())) {
@@ -288,11 +291,18 @@ int main() {
 				}
 				if (fractal != nullptr) {fractal->imgui();}
 
+				ImGui::Spacing();
+				ImGui::Spacing();
+
             }
 			
 			// Camera Properties
 			ImGui::Spacing();
 			if (camerawindow && ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Text("Position");
 
 				int length = Arbitrary::max_length();
 				char* buffer = (char*) malloc(length+1);
@@ -323,6 +333,10 @@ int main() {
 
 				}
 
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Text("Zoom");
+
 				next = Arbitrary::serialise(Camera::getDepth());
 				memcpy(buffer, next.c_str(), next.length()+1);
 				ImGui::InputText("Depth", buffer, length);
@@ -337,6 +351,10 @@ int main() {
 				}
 
 				free(buffer);
+
+				ImGui::Spacing();
+				ImGui::Spacing();
+
 			}
 
 			// Postprocessing Properties
@@ -364,6 +382,9 @@ int main() {
 					ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
 					if (p != nullptr) {colormap = p; flag = true;}
 				}
+
+				ImGui::Spacing();
+				ImGui::Spacing();
 
 			}
 
