@@ -25,10 +25,11 @@
 namespace {
 
 	GLFWwindow* window;
-	Framebuffer* renderbuffer = nullptr;
-	Framebuffer* savebuffer = nullptr;
+	Framebuffer* fractalbuffer = nullptr;
+	Framebuffer* curvebuffer = nullptr;
 
 	ShaderProgram* fractal = nullptr;
+	ShaderProgram* transformation = nullptr;
 	ShaderProgram* colormap = nullptr;
 
 	bool camerawindow = false;
@@ -37,6 +38,7 @@ namespace {
 	int fractaloption = 0;
 
 	bool postprocessingwindow = false;
+	int transformationoption = 0;
 	int coloroption = 0;
 
 	bool flag = true;
@@ -72,11 +74,8 @@ void resize(GLFWwindow* window, int width, int height) {
 	w = width;
 	h = height;
 
-	if (renderbuffer != nullptr) {delete renderbuffer;}
-	renderbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
-
-	if (savebuffer != nullptr) {delete savebuffer;}
-	savebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+	if (fractalbuffer != nullptr) {delete fractalbuffer;} fractalbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+	if   (curvebuffer != nullptr) {delete curvebuffer;}     curvebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
 	Camera::adjust();
 	glViewport(0, 0, width, height);
@@ -136,11 +135,17 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	// Initialise the shader programs
+	// Fractal Shader Program
 	fractal = ShaderProgramPool::get().get("Fractal", "Mandelbrot");
 	std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
 	for (int a = 0; a < names.size(); a++) {if (names[a] == "Mandelbrot") {fractaloption = a; break;}}
 	
+	// Transformation Shader Program
+	transformation = ShaderProgramPool::get().get("Transformation", "None");
+	names = ShaderProgramPool::get().names("Transformation");
+	for (int a = 0; a < names.size(); a++) {if (names[a] == "None") {transformationoption = a; break;}}
+
+	// Colormap Shader Program
 	colormap = ShaderProgramPool::get().get("Colormap", "HSV");
 	names = ShaderProgramPool::get().names("Colormap");
 	for (int a = 0; a < names.size(); a++) {if (names[a] == "HSV") {coloroption = a; break;}}
@@ -197,10 +202,10 @@ int main() {
 			Arbitrary height = Arbitrary(0.5f) * Camera::getDepth() * Camera::getHeight();
 
 			// Render the fractal in black and white to the buffer.
-			renderbuffer->bind();
+			fractalbuffer->bind();
 			fractal->upload();
 			renderer.render();
-			renderbuffer->unbind();
+			fractalbuffer->unbind();
 
 			glViewport(0, 0, Window::getWidth(), Window::getHeight());
 
@@ -209,14 +214,19 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Apply post processing to the image.
-		renderbuffer->getTexture()->bind();
+		// Apply the curve transformation to the image.
+		curvebuffer->bind();
+		fractalbuffer->getTexture()->bind();
+		transformation->upload();
+		renderer.render();
+		fractalbuffer->getTexture()->unbind();
+		curvebuffer->unbind();
+
+		// Apply the color mapping to the image.
+		curvebuffer->getTexture()->bind();
 		colormap->upload();
-		savebuffer->bind();
 		renderer.render();
-		savebuffer->unbind();
-		renderer.render();
-		renderbuffer->getTexture()->unbind();
+		curvebuffer->getTexture()->unbind();
 
 		// Imgui
 		ImGui_ImplOpenGL3_NewFrame();
@@ -333,9 +343,24 @@ int main() {
 			ImGui::Spacing();
 			if (postprocessingwindow && ImGui::CollapsingHeader("PostProcessing", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-				std::vector<std::string> names = ShaderProgramPool::get().names("Colormap");
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Text("Curve");
+				std::vector<std::string> names = ShaderProgramPool::get().names("Transformation");
 				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Color", &coloroption, strings.data(), strings.size())) {
+				if (ImGui::Combo("Type", &transformationoption, strings.data(), strings.size())) {
+					ShaderProgram* p = ShaderProgramPool::get().get("Transformation", names[transformationoption]);
+					if (p != nullptr) {transformation = p; flag = true;}
+				}
+
+				if (transformation != nullptr) {transformation->imgui();}
+
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Text("Color");
+				names = ShaderProgramPool::get().names("Colormap");
+				strings.clear(); for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
+				if (ImGui::Combo("Colormap", &coloroption, strings.data(), strings.size())) {
 					ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
 					if (p != nullptr) {colormap = p; flag = true;}
 				}
@@ -360,6 +385,7 @@ int main() {
 
 	// For now just to test, we will save the save buffer on close.
 	// TODO: create a save event to call these lines of code.
+	/*
 	unsigned char* data = (unsigned char*) malloc(w * h * 3);
 	savebuffer->bind();
 	glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -367,13 +393,11 @@ int main() {
 	stbi_flip_vertically_on_write(1);
 	stbi_write_png("test.png", Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
 	free(data);
+	*/
 
-	// Destroy the framebuffers.
-	delete renderbuffer;
-	delete savebuffer;
-
-	// Destroy the shaders.
-	delete fractal;
+	// Destroy the fractalbuffers.
+	delete fractalbuffer;
+	delete curvebuffer;
 
 	// Destroy imgui
 	ImGui_ImplOpenGL3_Shutdown();

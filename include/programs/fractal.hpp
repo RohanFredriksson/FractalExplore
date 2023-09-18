@@ -32,7 +32,7 @@ class FractalProgram : public ShaderProgram {
 
         } 
 
-        void upload() override {
+        virtual void upload() override {
             
             Shader* s = this->getShader();
             Arbitrary width = Arbitrary(0.5f) * Camera::getDepth() * Camera::getWidth();
@@ -40,13 +40,13 @@ class FractalProgram : public ShaderProgram {
         
 			s->uploadInt("uIterations", this->iterations);
 			s->uploadUnsignedIntArray("uPositionX", Arbitrary::precision()+1, Camera::getX().data());
-			s->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, Arbitrary::negate(Camera::getY()).data());
+			s->uploadUnsignedIntArray("uPositionY", Arbitrary::precision()+1, Camera::getY().data());
 			s->uploadUnsignedIntArray("uScaleX", Arbitrary::precision()+1, width.data());
 			s->uploadUnsignedIntArray("uScaleY", Arbitrary::precision()+1, height.data());
 
         }
 
-        void imgui() override {
+        virtual void imgui() override {
 
             int next = this->precision;
 			ImGui::InputInt("Precision", &next);

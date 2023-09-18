@@ -7,12 +7,12 @@ class TransformationProgram : public ShaderProgram {
 
     public:
 
-        void upload() override {
+        virtual void upload() override {
             Shader* s = this->getShader();
             s->uploadTexture("uTexture", 0);
         }
 
-        void imgui() override {
+        virtual void imgui() override {
 
         }
 

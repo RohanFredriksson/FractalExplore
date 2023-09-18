@@ -31,6 +31,8 @@ class ShaderProgram {
         
 };
 
+#include <iostream>
+
 class ShaderProgramPool {
 
     private:
@@ -44,6 +46,8 @@ class ShaderProgramPool {
         }
 
         void add(std::string type, std::string name, ShaderProgram* program) {
+
+            std::cout << "ADDED: " << type << ": " << name << "\n";
 
             program->setName(name);
             program->setType(type);
