@@ -147,8 +147,7 @@ int main() {
 	// Initialise ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
+	ImGuiIO& io = ImGui::GetIO(); (void)io; io.IniFilename = NULL;
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
