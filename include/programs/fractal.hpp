@@ -6,7 +6,7 @@
 #include "core/window.hpp"
 #include "core/camera.hpp"
 #include "core/arbitrary.hpp"
-#include "graphics/shader.hpp"
+#include "programs/program.hpp"
 
 class FractalProgram : public ShaderProgram {
 

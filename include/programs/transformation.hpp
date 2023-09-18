@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include "programs/program.hpp"
 
-class ColormapProgram : public ShaderProgram {
+class TransformationProgram : public ShaderProgram {
 
     public:
 

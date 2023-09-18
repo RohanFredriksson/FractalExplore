@@ -20,6 +20,7 @@
 #include "core/camera.hpp"
 #include "graphics.hpp"
 
+#include "programs/program.hpp"
 
 namespace {
 
@@ -48,15 +49,15 @@ namespace {
 
 namespace Window {
 
-	int width() {
+	int getWidth() {
 		return w;
 	}
 
-	int height() {
+	int getHeight() {
 		return h;
 	}
 
-	float ratio() {
+	float getRatio() {
 		return (float) w / (float) h;
 	}
 
@@ -97,7 +98,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create the window
-	window = glfwCreateWindow(Window::width(), Window::height(), "Fractal Explore", NULL, NULL);
+	window = glfwCreateWindow(Window::getWidth(), Window::getHeight(), "Fractal Explore", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -149,7 +150,7 @@ int main() {
 	renderer.start();
 
 	// Call the resize callback for initialisation.
-	resize(window, Window::width(), Window::height());
+	resize(window, Window::getWidth(), Window::getHeight());
 
 	// Loop variables
 	float begin = (float) glfwGetTime();
@@ -189,7 +190,7 @@ int main() {
 
 			flag = false;
 
-			glViewport(0, 0, Window::width(), Window::height());
+			glViewport(0, 0, Window::getWidth(), Window::getHeight());
 
 			// Determine the scale factor for the shader.
 			Arbitrary width = Arbitrary(0.5f) * Camera::getDepth() * Camera::getWidth();
@@ -201,7 +202,7 @@ int main() {
 			renderer.render();
 			renderbuffer->unbind();
 
-			glViewport(0, 0, Window::width(), Window::height());
+			glViewport(0, 0, Window::getWidth(), Window::getHeight());
 
 		}
 
@@ -247,21 +248,21 @@ int main() {
 
 		// If the side window opened.
 		if (!before && after && maximized == 0) {
-			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::width());
+			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::getWidth());
 			Camera::setX(Camera::getX() + dx);
-			glfwSetWindowSize(window, Window::width() + 300, Window::height());
+			glfwSetWindowSize(window, Window::getWidth() + 300, Window::getHeight());
 		}
 
 		// If the side window closed.
 		else if (before && !after && maximized == 0) {
-			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::width());
+			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::getWidth());
 			Camera::setX(Camera::getX() - dx);
-			glfwSetWindowSize(window, Window::width() - 300, Window::height());
+			glfwSetWindowSize(window, Window::getWidth() - 300, Window::getHeight());
 		}
 
 		if (fractalwindow || camerawindow || postprocessingwindow) {
 
-			ImGui::SetNextWindowSize(ImVec2(300, Window::height()));
+			ImGui::SetNextWindowSize(ImVec2(300, Window::getHeight()));
 			ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 300, 18), ImGuiCond_Always);
 			ImGui::Begin("#Configure", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 			
@@ -361,10 +362,10 @@ int main() {
 	// TODO: create a save event to call these lines of code.
 	unsigned char* data = (unsigned char*) malloc(w * h * 3);
 	savebuffer->bind();
-	glReadPixels(0, 0, Window::width(), Window::height(), GL_RGB, GL_UNSIGNED_BYTE, data);
+	glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
 	savebuffer->unbind();
 	stbi_flip_vertically_on_write(1);
-	stbi_write_png("test.png", Window::width(), Window::height(), 3, data, Window::width() * 3);
+	stbi_write_png("test.png", Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
 	free(data);
 
 	// Destroy the framebuffers.

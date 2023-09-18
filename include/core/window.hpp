@@ -1,8 +1,8 @@
 #pragma once
 
 namespace Window {
-    int width();
-    int height();
-    float ratio();
+    int getWidth();
+    int getHeight();
+    float getRatio();
     void update();
 }

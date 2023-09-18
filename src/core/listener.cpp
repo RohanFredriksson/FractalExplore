@@ -65,12 +65,12 @@ bool KeyListener::isKeyBeginDown(int key) {
 }
 
 void MouseListener::calcOrthoX() {
-    float currentX = ((float) x / Window::width()) * 2.0f - 1.0f;
+    float currentX = ((float) x / Window::getWidth()) * 2.0f - 1.0f;
     worldX = Camera::getX() + Arbitrary(0.5f * currentX) * (Camera::getWidth() * Camera::getDepth());
 }
 
 void MouseListener::calcOrthoY() {
-    float currentY = ((float) y / Window::height()) * 2.0f - 1.0f;
+    float currentY = ((float) y / Window::getHeight()) * 2.0f - 1.0f;
     worldY = Camera::getY() + Arbitrary(-0.5f * currentY) * (Camera::getHeight() * Camera::getDepth());
 }
 

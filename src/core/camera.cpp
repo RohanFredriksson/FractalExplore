@@ -22,7 +22,7 @@ namespace Camera {
     }
 
     void adjust() {
-        width = height * Arbitrary(Window::ratio());
+        width = height * Arbitrary(Window::getRatio());
     }
 
     Arbitrary getX() {
