@@ -242,15 +242,18 @@ int main() {
         }
 		bool after = fractalwindow || camerawindow || postprocessingwindow;
 		
+		// Check if the window is maximised.
+		int maximized = glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
+
 		// If the side window opened.
-		if (!before && after) {
+		if (!before && after && maximized == 0) {
 			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::width());
 			Camera::setX(Camera::getX() + dx);
 			glfwSetWindowSize(window, Window::width() + 300, Window::height());
 		}
 
 		// If the side window closed.
-		else if (before && !after) {
+		else if (before && !after && maximized == 0) {
 			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::width());
 			Camera::setX(Camera::getX() - dx);
 			glfwSetWindowSize(window, Window::width() - 300, Window::height());
