@@ -104,6 +104,7 @@ void main() {
     load(c_i, fPosition.y);
     mul(c_i, uScaleY, c_i);
     add(c_i, uPositionY, c_i);
+    negate(c_i);
     
     color = vec3(1.0, 1.0, 1.0) * burningship(c_r, c_i);
 
