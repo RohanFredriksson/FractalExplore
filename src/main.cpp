@@ -5,6 +5,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -14,6 +17,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "assets/icon.hpp"
 #include "core/arbitrary.hpp"
 #include "core/window.hpp"
 #include "core/listener.hpp"
@@ -27,6 +31,7 @@ namespace {
 	GLFWwindow* window;
 	Framebuffer* fractalbuffer = nullptr;
 	Framebuffer* curvebuffer = nullptr;
+	Framebuffer* colorbuffer = nullptr;
 
 	ShaderProgram* fractal = nullptr;
 	ShaderProgram* transformation = nullptr;
@@ -75,7 +80,8 @@ void resize(GLFWwindow* window, int width, int height) {
 	h = height;
 
 	if (fractalbuffer != nullptr) {delete fractalbuffer;} fractalbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
-	if   (curvebuffer != nullptr) {delete curvebuffer;}     curvebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+	if (curvebuffer != nullptr) {delete curvebuffer;} curvebuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+	if (colorbuffer != nullptr) {delete colorbuffer;} colorbuffer = new Framebuffer(GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
 	Camera::adjust();
 	glViewport(0, 0, width, height);
@@ -110,6 +116,18 @@ int main() {
 	glfwSetCursorPosCallback(window, MouseListener::mousePosCallback);
 	glfwSetMouseButtonCallback(window, MouseListener::mouseButtonCallback);
 	glfwSetScrollCallback(window, MouseListener::mouseScrollCallback);
+
+	// Load the icon
+	int width, height, channels;
+	unsigned char* image = stbi_load_from_memory(Icon::bytes, Icon::length, &width, &height, &channels, 0);
+	if (image != nullptr) {
+		GLFWimage icon;
+		icon.width = width;
+		icon.height = height;
+		icon.pixels = image;
+		glfwSetWindowIcon(window, 1, &icon);
+		stbi_image_free(image);
+	}
 
 	// Make the OpenGl context current
 	glfwMakeContextCurrent(window);
@@ -226,6 +244,9 @@ int main() {
 		curvebuffer->getTexture()->bind();
 		colormap->upload();
 		renderer.render();
+		colorbuffer->bind();
+		renderer.render();
+		colorbuffer->unbind();
 		curvebuffer->getTexture()->unbind();
 
 		// Imgui
@@ -408,19 +429,18 @@ int main() {
 
 	// For now just to test, we will save the save buffer on close.
 	// TODO: create a save event to call these lines of code.
-	/*
 	unsigned char* data = (unsigned char*) malloc(w * h * 3);
-	savebuffer->bind();
+	colorbuffer->bind();
 	glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
-	savebuffer->unbind();
+	colorbuffer->unbind();
 	stbi_flip_vertically_on_write(1);
 	stbi_write_png("test.png", Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
 	free(data);
-	*/
 
 	// Destroy the fractalbuffers.
 	delete fractalbuffer;
 	delete curvebuffer;
+	delete colorbuffer;
 
 	// Destroy imgui
 	ImGui_ImplOpenGL3_Shutdown();

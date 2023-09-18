@@ -1,5 +1,4 @@
-!build/
 build/*
-!build/assets/
-build/assets/*
-!build/assets/shaders/
+!build/icon.ico
+!build/icon.png
+!build/resources.rc
