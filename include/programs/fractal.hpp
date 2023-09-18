@@ -49,7 +49,7 @@ class FractalProgram : public ShaderProgram {
         virtual void imgui() override {
 
             int next = this->precision;
-			ImGui::InputInt("Precision", &next);
+			ImGui::InputInt("Precision##Fractal", &next);
 			if (next != precision && next > 0 && next < Arbitrary::precision()) {
 				this->precision = next;
 				this->compile();
@@ -57,7 +57,7 @@ class FractalProgram : public ShaderProgram {
 			}
 
 			next = this->iterations;
-			ImGui::InputInt("Iterations", &next);
+			ImGui::InputInt("Iterations##Fractal", &next);
 			if (next != iterations && next >= 0) {
 				this->iterations = next;
 				Window::update();

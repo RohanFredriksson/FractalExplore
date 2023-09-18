@@ -285,7 +285,7 @@ int main() {
 				ImGui::Text("Fractal");
 				std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
 				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Type", &fractaloption, strings.data(), strings.size())) {
+				if (ImGui::Combo("Type##Fractal", &fractaloption, strings.data(), strings.size())) {
 					ShaderProgram* p = ShaderProgramPool::get().get("Fractal", names[fractaloption]);
 					if (p != nullptr) {fractal = p; flag = true;}
 				}
@@ -309,7 +309,7 @@ int main() {
 
 				std::string next = Arbitrary::serialise(Camera::getX());
 				memcpy(buffer, next.c_str(), next.length()+1);
-				ImGui::InputText("X", buffer, length);
+				ImGui::InputText("X##Camera", buffer, length);
 				if (strcmp(buffer, next.c_str()) != 0) {
 					
 					std::string candidate(buffer);
@@ -322,7 +322,7 @@ int main() {
 
 				next = Arbitrary::serialise(Camera::getY()); 
 				memcpy(buffer, next.c_str(), next.length()+1);
-				ImGui::InputText("Y", buffer, length);
+				ImGui::InputText("Y##Camera", buffer, length);
 				if (strcmp(buffer, next.c_str()) != 0) {
 					
 					std::string candidate(buffer);
@@ -339,7 +339,7 @@ int main() {
 
 				next = Arbitrary::serialise(Camera::getDepth());
 				memcpy(buffer, next.c_str(), next.length()+1);
-				ImGui::InputText("Depth", buffer, length);
+				ImGui::InputText("Depth##Camera", buffer, length);
 				if (strcmp(buffer, next.c_str()) != 0) {
 					
 					std::string candidate(buffer);
@@ -366,7 +366,7 @@ int main() {
 				ImGui::Text("Curve");
 				std::vector<std::string> names = ShaderProgramPool::get().names("Transformation");
 				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Type", &transformationoption, strings.data(), strings.size())) {
+				if (ImGui::Combo("Type##PostProcessing", &transformationoption, strings.data(), strings.size())) {
 					ShaderProgram* p = ShaderProgramPool::get().get("Transformation", names[transformationoption]);
 					if (p != nullptr) {transformation = p; flag = true;}
 				}
@@ -378,7 +378,7 @@ int main() {
 				ImGui::Text("Color");
 				names = ShaderProgramPool::get().names("Colormap");
 				strings.clear(); for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Colormap", &coloroption, strings.data(), strings.size())) {
+				if (ImGui::Combo("Colormap##PostProcessing", &coloroption, strings.data(), strings.size())) {
 					ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
 					if (p != nullptr) {colormap = p; flag = true;}
 				}

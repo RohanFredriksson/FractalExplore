@@ -63,8 +63,8 @@ class SineWave: public TransformationProgram {
 
         void imgui() override {
             this->TransformationProgram::imgui();
-            ImGui::SliderFloat("Frequency", &this->frequency, -16.0f, 16.0f);
-            ImGui::SliderFloat("Phase", &this->phase, -M_PI / this->frequency, M_PI / this->frequency);
+            ImGui::SliderFloat("Frequency##SineWave", &this->frequency, -16.0f, 16.0f);
+            ImGui::SliderFloat("Phase##SineWave", &this->phase, -M_PI / this->frequency, M_PI / this->frequency);
         }
 
 };
