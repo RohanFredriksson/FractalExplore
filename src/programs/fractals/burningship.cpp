@@ -1,4 +1,4 @@
-#include "graphics/fractal.hpp"
+#include "programs/fractal.hpp"
 
 namespace BurningShipCode {
 

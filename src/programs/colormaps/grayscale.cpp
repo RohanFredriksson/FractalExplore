@@ -1,6 +1,6 @@
-#include "graphics/colormap.hpp"
+#include "programs/colormap.hpp"
 
-namespace HSVCode {
+namespace GrayscaleCode {
 
 const char* vertex = R"(
 #version 400 core
@@ -26,40 +26,25 @@ uniform sampler2D uTexture;
 
 out vec3 color;
 
-vec3 hsv2rgb(vec3 c) {
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
-
 void main() {
-
     float value = texture(uTexture, fTexCoords).x;
-    if (value == 0.0) {
-        color = vec3(0.0, 0.0, 0.0);
-    } 
-    
-    else {
-        vec3 rgb = hsv2rgb(vec3(value, 1.0, 1.0));
-        color = vec3(rgb.x, rgb.y, rgb.z);
-    }
-    
+    color = vec3(value, value, value);
 })";
 
 }
 
-class HSV : public ColormapProgram {
+class Grayscale : public ColormapProgram {
 
     public:
 
         std::string vertex() override {
-            return std::string(HSVCode::vertex);
+            return std::string(GrayscaleCode::vertex);
         }
 
         std::string fragment() override {
-            return std::string(HSVCode::fragment);
+            return std::string(GrayscaleCode::fragment);
         }
 
 };
 
-REGISTER_SHADER_PROGRAM(Colormap, HSV);
+REGISTER_SHADER_PROGRAM(Colormap, Grayscale);

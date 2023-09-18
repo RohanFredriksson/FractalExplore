@@ -1,4 +1,4 @@
-#include "graphics/colormap.hpp"
+#include "programs/colormap.hpp"
 
 namespace SunsetCode {
 

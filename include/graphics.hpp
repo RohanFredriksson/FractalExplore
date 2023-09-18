@@ -1,4 +1,3 @@
-#include "graphics/fractal.hpp"
 #include "graphics/framebuffer.hpp"
 #include "graphics/renderer.hpp"
 #include "graphics/shader.hpp"
