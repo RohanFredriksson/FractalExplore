@@ -261,6 +261,7 @@ int main() {
 			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::getWidth());
 			Camera::setX(Camera::getX() + dx);
 			glfwSetWindowSize(window, Window::getWidth() + 300, Window::getHeight());
+			Window::update();
 		}
 
 		// If the side window closed.
@@ -268,6 +269,7 @@ int main() {
 			Arbitrary dx = Arbitrary(150) * ((Camera::getWidth() * Camera::getDepth()) / Window::getWidth());
 			Camera::setX(Camera::getX() - dx);
 			glfwSetWindowSize(window, Window::getWidth() - 300, Window::getHeight());
+			Window::update();
 		}
 
 		if (fractalwindow || camerawindow || postprocessingwindow) {
@@ -337,14 +339,14 @@ int main() {
 				ImGui::Spacing();
 				ImGui::Text("Zoom");
 
-				next = Arbitrary::serialise(Camera::getDepth());
+				next = Arbitrary::serialise(Arbitrary::reciprocal(Camera::getDepth()));
 				memcpy(buffer, next.c_str(), next.length()+1);
-				ImGui::InputText("Depth##Camera", buffer, length);
+				ImGui::InputText("Zoom##Camera", buffer, length);
 				if (strcmp(buffer, next.c_str()) != 0) {
 					
 					std::string candidate(buffer);
 					if (Arbitrary::validate(candidate)) {
-						Camera::setDepth(Arbitrary(candidate));
+						Camera::setDepth(Arbitrary::reciprocal(Arbitrary(candidate)));
 						flag = true;
 					}
 
