@@ -266,6 +266,7 @@ int main() {
 	float begin = (float) glfwGetTime();
 	float end = begin;
 	float dt = -1.0f;
+	int startDown = 0;
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {	
@@ -274,10 +275,18 @@ int main() {
 		glfwPollEvents();
 
 		// Update Stage
-		if (MouseListener::isMouseDragging()) {
-			if (MouseListener::getDx() != 0.0) {Camera::setX(Camera::getX() - MouseListener::getWorldDx());}
-			if (MouseListener::getDy() != 0.0) {Camera::setY(Camera::getY() - MouseListener::getWorldDy());}
-			flag = true;
+		if (MouseListener::isMouseBeginDown()) {
+			startDown = MouseListener::getX();
+		}
+
+		if (startDown < Window::getWidth() - 300|| !(fractalWindow.opened || cameraWindow.opened || postprocessingWindow.opened)) {
+
+			if (MouseListener::isMouseDragging()) {
+				if (MouseListener::getDx() != 0.0) {Camera::setX(Camera::getX() - MouseListener::getWorldDx());}
+				if (MouseListener::getDy() != 0.0) {Camera::setY(Camera::getY() - MouseListener::getWorldDy());}
+				flag = true;
+			}
+
 		}
 
 		if (MouseListener::getScrollY() != 0.0f) {

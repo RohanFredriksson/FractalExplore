@@ -20,7 +20,7 @@ target_include_directories(imgui PUBLIC dependencies/imgui)
 target_include_directories(imgui PUBLIC dependencies/imgui/backends)
 
 if (WIN32)
-    set(CMAKE_WIN32_EXECUTABLE ON)
+    #set(CMAKE_WIN32_EXECUTABLE ON)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall -g")

@@ -143,13 +143,13 @@ class Julia : public FractalProgram {
             float next = prev;
 
             ImGui::SliderFloat("Real##Julia", &next, -1.0f, 1.0f);
-            if (next != prev) {this->real = Arbitrary(next);}
+            if (next != prev) {this->real = Arbitrary(next); Window::update();}
 
             prev = (float) Arbitrary::value(this->imaginary);
             next = prev;
 
             ImGui::SliderFloat("Imaginary##Julia", &next, -1.0f, 1.0f);
-            if (next != prev) {this->imaginary = Arbitrary(next);}
+            if (next != prev) {this->imaginary = Arbitrary(next); Window::update();}
 
         }
 

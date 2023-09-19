@@ -21,6 +21,7 @@ namespace {
     bool mouseDown[9] = {0};
     bool mouseBeginDown[9] = {0};
     int mouseDownCount = 0;
+    int lastMouseDownCount = 0;
     bool mouseDragging = 0;
     
 }
@@ -136,6 +137,11 @@ bool MouseListener::isMouseBeginDown(int button) {
     return false;
 }
 
+bool MouseListener::isMouseBeginDown() {
+    if (lastMouseDownCount == 0 && mouseDownCount > 0) {return true;}
+    return false;
+}
+
 bool MouseListener::hasMouseMoved() {
     return x != lastX || y != lastY;
 }
@@ -192,6 +198,7 @@ void MouseListener::endFrame() {
     lastY = y;
     lastWorldX = worldX;
     lastWorldY = worldY;
+    lastMouseDownCount = mouseDownCount;
     calcOrthoX();
     calcOrthoY();
 
