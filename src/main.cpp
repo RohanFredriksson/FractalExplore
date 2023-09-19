@@ -133,12 +133,15 @@ void saveImage() {
 
 	if (validate(filename)) {
 
-		unsigned char* data = (unsigned char*) malloc(Window::getWidth() * Window::getHeight() * 3);
+		int width = Window::getWidth() - ((fractalWindow.opened || cameraWindow.opened || postprocessingWindow.opened) ? 300 : 0);
+		int height = Window::getHeight();
+
+		unsigned char* data = (unsigned char*) malloc(width * height * 3);
 		colorbuffer->bind();
-		glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
+		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
 		colorbuffer->unbind();
 		stbi_flip_vertically_on_write(1);
-		stbi_write_png(filename.c_str(), Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
+		stbi_write_png(filename.c_str(), width, height, 3, data, width * 3);
 		free(data);
 
 		popupWindow.time = 4.0f;
