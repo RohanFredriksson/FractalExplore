@@ -44,6 +44,7 @@ namespace {
 
 	bool savewindow = false;
 	char savefilename[256] = "screenshot.png";
+	bool saveenter = false;
 
 	bool camerawindow = false;
 
@@ -101,9 +102,27 @@ std::string trim(const std::string string) {
 
 bool validate(const std::string filename) {
 	std::regex pattern("^[\\w\\-. ]+$");
-	std::cout << filename << ": " << std::regex_match(filename, pattern) << "\n";
 	return std::regex_match(filename, pattern);
 }
+
+void save() {
+
+	std::string filename(savefilename);
+	filename = trim(filename);
+	if (filename == "") {filename = timestamp() + ".png";}
+
+	if (validate(filename)) {
+		unsigned char* data = (unsigned char*) malloc(Window::getWidth() * Window::getHeight() * 3);
+		colorbuffer->bind();
+		glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
+		colorbuffer->unbind();
+		stbi_flip_vertically_on_write(1);
+		stbi_write_png(filename.c_str(), Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
+		savewindow = false;
+		free(data);
+	}
+
+} 
 
 void resize(GLFWwindow* window, int width, int height) {
 
@@ -459,27 +478,14 @@ int main() {
 			ImGui::Text("Filename:");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Filename:").x - 23.0f);
-            ImGui::InputText("##SaveFilename", savefilename, sizeof(savefilename));
+            if (ImGui::InputText("##SaveFilename", savefilename, sizeof(savefilename), ImGuiInputTextFlags_EnterReturnsTrue, nullptr)) {
+				save();
+			}
 
 			// Save Button
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Save").x - ImGui::CalcTextSize("Cancel").x - 30.0f);
             if (ImGui::Button("Save##SaveSave")) {
-				
-				std::string filename(savefilename);
-				filename = trim(filename);
-				if (filename == "") {filename = timestamp() + ".png";}
-
-				if (validate(filename)) {
-					unsigned char* data = (unsigned char*) malloc(Window::getWidth() * Window::getHeight() * 3);
-					colorbuffer->bind();
-					glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
-					colorbuffer->unbind();
-					stbi_flip_vertically_on_write(1);
-					stbi_write_png(filename.c_str(), Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
-					savewindow = false;
-					free(data);
-				}
-
+				save();
             }
 
 			// Cancel Button
