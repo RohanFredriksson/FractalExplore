@@ -139,37 +139,18 @@ class Julia : public FractalProgram {
 
             this->FractalProgram::imgui();
 
-            int length = Arbitrary::max_length();
-            char* buffer = (char*) malloc(length+1);
+            float prev = (float) Arbitrary::value(this->real);
+            float next = prev;
 
-            std::string next = Arbitrary::serialise(this->real);
-            memcpy(buffer, next.c_str(), next.length()+1);
-            ImGui::InputText("Real##Julia", buffer, length);
-            if (strcmp(buffer, next.c_str()) != 0) {
-                
-                std::string candidate(buffer);
-                if (Arbitrary::validate(candidate)) {
-                    this->real = Arbitrary(candidate);
-                    Window::update();
-                }
+            ImGui::SliderFloat("Real##Julia", &next, -1.0f, 1.0f);
+            if (next != prev) {this->real = Arbitrary(next);}
 
-            }
+            prev = (float) Arbitrary::value(this->imaginary);
+            next = prev;
 
-            next = Arbitrary::serialise(this->imaginary); 
-            memcpy(buffer, next.c_str(), next.length()+1);
-            ImGui::InputText("Imaginary##Julia", buffer, length);
-            if (strcmp(buffer, next.c_str()) != 0) {
-                
-                std::string candidate(buffer);
-                if (Arbitrary::validate(candidate)) {
-                    this->imaginary = Arbitrary(candidate);
-                    Window::update();
-                }
+            ImGui::SliderFloat("Imaginary##Julia", &next, -1.0f, 1.0f);
+            if (next != prev) {this->imaginary = Arbitrary(next);}
 
-            }
-
-            free(buffer);
-            
         }
 
 };
