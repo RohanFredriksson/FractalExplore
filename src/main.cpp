@@ -33,6 +33,33 @@
 
 namespace {
 
+	struct FractalWindow {
+		bool opened;
+		int fractalOption;
+	};
+
+	struct CameraWindow {
+		bool opened;
+	};
+
+	struct PostprocessingWindow {
+		bool opened;
+		int transformationOption;
+		int colorOption;
+	};
+
+	struct SaveWindow {
+		bool opened;
+		bool entered;
+		char filename[256];
+	};
+
+	struct PopupWindow {
+		float time;
+		std::string title;
+		std::string message;
+	};
+
 	GLFWwindow* window;
 	Framebuffer* fractalbuffer = nullptr;
 	Framebuffer* curvebuffer = nullptr;
@@ -42,18 +69,11 @@ namespace {
 	ShaderProgram* transformation = nullptr;
 	ShaderProgram* colormap = nullptr;
 
-	bool savewindow = false;
-	char savefilename[256] = "screenshot.png";
-	bool saveenter = false;
-
-	bool camerawindow = false;
-
-	bool fractalwindow = false;
-	int fractaloption = 0;
-
-	bool postprocessingwindow = false;
-	int transformationoption = 0;
-	int coloroption = 0;
+	FractalWindow fractalWindow = { false, 0 };
+	CameraWindow cameraWindow = { false };
+	PostprocessingWindow postprocessingWindow = { false, 0, 0 };
+	PopupWindow popupWindow = { 0.0f, "", "" };
+	SaveWindow saveWindow = { false, false, "screenshot.png" };
 
 	bool flag = true;
 
@@ -105,9 +125,9 @@ bool validate(const std::string filename) {
 	return std::regex_match(filename, pattern);
 }
 
-void save() {
+void saveImage() {
 
-	std::string filename(savefilename);
+	std::string filename(saveWindow.filename);
 	filename = trim(filename);
 	if (filename == "") {filename = timestamp() + ".png";}
 
@@ -118,7 +138,7 @@ void save() {
 		colorbuffer->unbind();
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png(filename.c_str(), Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
-		savewindow = false;
+		saveWindow.opened = false;
 		free(data);
 	}
 
@@ -205,17 +225,17 @@ int main() {
 	// Fractal Shader Program
 	fractal = ShaderProgramPool::get().get("Fractal", "Mandelbrot");
 	std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
-	for (int a = 0; a < names.size(); a++) {if (names[a] == "Mandelbrot") {fractaloption = a; break;}}
+	for (int a = 0; a < names.size(); a++) {if (names[a] == "Mandelbrot") {fractalWindow.fractalOption = a; break;}}
 	
 	// Transformation Shader Program
 	transformation = ShaderProgramPool::get().get("Transformation", "None");
 	names = ShaderProgramPool::get().names("Transformation");
-	for (int a = 0; a < names.size(); a++) {if (names[a] == "None") {transformationoption = a; break;}}
+	for (int a = 0; a < names.size(); a++) {if (names[a] == "None") {postprocessingWindow.transformationOption = a; break;}}
 
 	// Colormap Shader Program
 	colormap = ShaderProgramPool::get().get("Colormap", "HSV");
 	names = ShaderProgramPool::get().names("Colormap");
-	for (int a = 0; a < names.size(); a++) {if (names[a] == "HSV") {coloroption = a; break;}}
+	for (int a = 0; a < names.size(); a++) {if (names[a] == "HSV") {postprocessingWindow.colorOption = a; break;}}
 
 	// Renderer
 	Renderer renderer;
@@ -258,7 +278,7 @@ int main() {
 		}
 
 		if (KeyListener::isKeyBeginDown(GLFW_KEY_S) && (KeyListener::isKeyDown(GLFW_KEY_LEFT_CONTROL) || KeyListener::isKeyDown(GLFW_KEY_RIGHT_CONTROL))) {
-			savewindow = true;
+			saveWindow.opened = true;
 		}
 
 		// Render Stage
@@ -308,24 +328,24 @@ int main() {
 		ImGui::NewFrame();
 
 		// Main menu bar
-		bool before = fractalwindow || camerawindow || postprocessingwindow;
+		bool before = fractalWindow.opened || cameraWindow.opened || postprocessingWindow.opened;
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Save", "Ctrl+S")) {savewindow = !savewindow;}
+                if (ImGui::MenuItem("Save", "Ctrl+S")) {saveWindow.opened = !saveWindow.opened;}
                 if (ImGui::MenuItem("Quit", "Alt+F4")) {glfwSetWindowShouldClose(window, true);}
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("Configure")) {
-                if (ImGui::MenuItem("Fractal", (fractalwindow ? "+": "-"))) {fractalwindow = !fractalwindow;}
-				if (ImGui::MenuItem("Camera", (camerawindow ? "+": "-"))) {camerawindow = !camerawindow;}
-				if (ImGui::MenuItem("PostProcessing", (postprocessingwindow ? "+": "-"))) {postprocessingwindow = !postprocessingwindow;}
+                if (ImGui::MenuItem("Fractal", (fractalWindow.opened ? "+": "-"))) {fractalWindow.opened = !fractalWindow.opened;}
+				if (ImGui::MenuItem("Camera", (cameraWindow.opened ? "+": "-"))) {cameraWindow.opened = !cameraWindow.opened;}
+				if (ImGui::MenuItem("PostProcessing", (postprocessingWindow.opened ? "+": "-"))) {postprocessingWindow.opened = !postprocessingWindow.opened;}
                 ImGui::EndMenu();
             }
 
             ImGui::EndMainMenuBar();
         }
-		bool after = fractalwindow || camerawindow || postprocessingwindow;
+		bool after = fractalWindow.opened || cameraWindow.opened || postprocessingWindow.opened;
 		
 		// Check if the window is maximised.
 		int maximized = glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
@@ -346,7 +366,7 @@ int main() {
 			Window::update();
 		}
 
-		if (fractalwindow || camerawindow || postprocessingwindow) {
+		if (fractalWindow.opened || cameraWindow.opened || postprocessingWindow.opened) {
 
 			ImGui::SetNextWindowSize(ImVec2(300, Window::getHeight()));
 			ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 300, 18), ImGuiCond_Always);
@@ -354,15 +374,15 @@ int main() {
 			
 			// Fractal Properties
 			ImGui::Spacing();
-            if (fractalwindow && ImGui::CollapsingHeader("Fractal", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (fractalWindow.opened && ImGui::CollapsingHeader("Fractal", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 				ImGui::Spacing();
 				ImGui::Spacing();
 				ImGui::Text("Fractal");
 				std::vector<std::string> names = ShaderProgramPool::get().names("Fractal");
 				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Type##Fractal", &fractaloption, strings.data(), strings.size())) {
-					ShaderProgram* p = ShaderProgramPool::get().get("Fractal", names[fractaloption]);
+				if (ImGui::Combo("Type##Fractal", &fractalWindow.fractalOption, strings.data(), strings.size())) {
+					ShaderProgram* p = ShaderProgramPool::get().get("Fractal", names[fractalWindow.fractalOption]);
 					if (p != nullptr) {fractal = p; flag = true;}
 				}
 				if (fractal != nullptr) {fractal->imgui();}
@@ -374,7 +394,7 @@ int main() {
 			
 			// Camera Properties
 			ImGui::Spacing();
-			if (camerawindow && ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (cameraWindow.opened && ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 				ImGui::Spacing();
 				ImGui::Spacing();
@@ -435,15 +455,15 @@ int main() {
 
 			// Postprocessing Properties
 			ImGui::Spacing();
-			if (postprocessingwindow && ImGui::CollapsingHeader("PostProcessing", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (postprocessingWindow.opened && ImGui::CollapsingHeader("PostProcessing", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 				ImGui::Spacing();
 				ImGui::Spacing();
 				ImGui::Text("Curve");
 				std::vector<std::string> names = ShaderProgramPool::get().names("Transformation");
 				std::vector<const char*> strings; for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Type##PostProcessing", &transformationoption, strings.data(), strings.size())) {
-					ShaderProgram* p = ShaderProgramPool::get().get("Transformation", names[transformationoption]);
+				if (ImGui::Combo("Type##PostProcessing", &postprocessingWindow.transformationOption, strings.data(), strings.size())) {
+					ShaderProgram* p = ShaderProgramPool::get().get("Transformation", names[postprocessingWindow.transformationOption]);
 					if (p != nullptr) {transformation = p; flag = true;}
 				}
 
@@ -454,8 +474,8 @@ int main() {
 				ImGui::Text("Color");
 				names = ShaderProgramPool::get().names("Colormap");
 				strings.clear(); for (int a = 0; a < names.size(); a++) {strings.push_back(names[a].c_str());}
-				if (ImGui::Combo("Colormap##PostProcessing", &coloroption, strings.data(), strings.size())) {
-					ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[coloroption]);
+				if (ImGui::Combo("Colormap##PostProcessing", &postprocessingWindow.colorOption, strings.data(), strings.size())) {
+					ShaderProgram* p = ShaderProgramPool::get().get("Colormap", names[postprocessingWindow.colorOption]);
 					if (p != nullptr) {colormap = p; flag = true;}
 				}
 
@@ -467,7 +487,7 @@ int main() {
 			ImGui::End();
 		}
 
-		if (savewindow) {
+		if (saveWindow.opened) {
 
 			// Window configuration
 			ImGui::SetNextWindowSize(ImVec2(400, 77));
@@ -478,21 +498,21 @@ int main() {
 			ImGui::Text("Filename:");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Filename:").x - 23.0f);
-            if (ImGui::InputText("##SaveFilename", savefilename, sizeof(savefilename), ImGuiInputTextFlags_EnterReturnsTrue, nullptr)) {
-				save();
+            if (ImGui::InputText("##SaveFilename", saveWindow.filename, sizeof(saveWindow.filename), ImGuiInputTextFlags_EnterReturnsTrue, nullptr)) {
+				saveImage();
 			}
 
 			// Save Button
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Save").x - ImGui::CalcTextSize("Cancel").x - 30.0f);
             if (ImGui::Button("Save##SaveSave")) {
-				save();
+				saveImage();
             }
 
 			// Cancel Button
 			ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Cancel").x - 15.0f); // Adjust 20.0f as needed
             if (ImGui::Button("Cancel##SaveCancel")) {
-                savewindow = false;
+                saveWindow.opened = false;
             }
 
 			ImGui::End();
