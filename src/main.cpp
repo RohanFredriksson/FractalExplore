@@ -132,14 +132,29 @@ void saveImage() {
 	if (filename == "") {filename = timestamp() + ".png";}
 
 	if (validate(filename)) {
+
 		unsigned char* data = (unsigned char*) malloc(Window::getWidth() * Window::getHeight() * 3);
 		colorbuffer->bind();
 		glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
 		colorbuffer->unbind();
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png(filename.c_str(), Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
-		saveWindow.opened = false;
 		free(data);
+
+		popupWindow.time = 4.0f;
+		popupWindow.title = "Image saved.";
+		popupWindow.message = "Image successfully saved to \"" + filename + "\".";
+
+		saveWindow.opened = false;
+
+	}
+
+	else {
+
+		popupWindow.time = 4.0f;
+		popupWindow.title = "Image could not be saved.";
+		popupWindow.message = "\"" + filename + "\" is not a valid filename.";
+
 	}
 
 } 
@@ -516,6 +531,19 @@ int main() {
             }
 
 			ImGui::End();
+
+		}
+
+		if (popupWindow.time > 0.0f) {
+
+			// Window configuration
+			ImGui::SetNextWindowSize(ImVec2(340, 50));
+			ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 350 - ((fractalWindow.opened || cameraWindow.opened || postprocessingWindow.opened) ? 300 : 0), 28), ImGuiCond_Always);
+			ImGui::Begin(popupWindow.title.c_str(), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
+			ImGui::Text(popupWindow.message.c_str());
+			ImGui::End();
+
+			popupWindow.time -= dt;
 
 		}
 
