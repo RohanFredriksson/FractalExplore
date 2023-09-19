@@ -1,6 +1,11 @@
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <string>
+#include <chrono>
+#include <cctype>
+#include <ctime>
+#include <regex>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
@@ -37,6 +42,9 @@ namespace {
 	ShaderProgram* transformation = nullptr;
 	ShaderProgram* colormap = nullptr;
 
+	bool savewindow = false;
+	char savefilename[256] = "screenshot.png";
+
 	bool camerawindow = false;
 
 	bool fractalwindow = false;
@@ -72,6 +80,29 @@ namespace Window {
 		flag = true;
 	}
 
+}
+
+std::string timestamp() {
+	auto now = std::chrono::system_clock::now();
+	std::time_t current = std::chrono::system_clock::to_time_t(now);
+	std::tm tm = *std::localtime(&current);
+	std::stringstream ss;
+	ss << std::put_time(&tm, "%Y-%m-%d_%H.%M.%S");
+	return ss.str();
+}
+
+std::string trim(const std::string string) {
+	std::string result(string);
+	size_t first = result.find_first_not_of(" \t\n\r\f\v");
+	if (first == std::string::npos) {return "";}
+	size_t last = result.find_last_not_of(" \t\n\r\f\v");
+	return result.substr(first, last - first + 1);
+}
+
+bool validate(const std::string filename) {
+	std::regex pattern("^[\\w\\-. ]+$");
+	std::cout << filename << ": " << std::regex_match(filename, pattern) << "\n";
+	return std::regex_match(filename, pattern);
 }
 
 void resize(GLFWwindow* window, int width, int height) {
@@ -207,6 +238,10 @@ int main() {
 			flag = true;
 		}
 
+		if (KeyListener::isKeyBeginDown(GLFW_KEY_S) && (KeyListener::isKeyDown(GLFW_KEY_LEFT_CONTROL) || KeyListener::isKeyDown(GLFW_KEY_RIGHT_CONTROL))) {
+			savewindow = true;
+		}
+
 		// Render Stage
 		if (flag) {
 
@@ -257,7 +292,7 @@ int main() {
 		bool before = fractalwindow || camerawindow || postprocessingwindow;
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+                if (ImGui::MenuItem("Save", "Ctrl+S")) {savewindow = !savewindow;}
                 if (ImGui::MenuItem("Quit", "Alt+F4")) {glfwSetWindowShouldClose(window, true);}
                 ImGui::EndMenu();
             }
@@ -413,6 +448,51 @@ int main() {
 			ImGui::End();
 		}
 
+		if (savewindow) {
+
+			// Window configuration
+			ImGui::SetNextWindowSize(ImVec2(400, 77));
+			ImGui::SetNextWindowPos(ImVec2(10, 28), ImGuiCond_Always);
+			ImGui::Begin("Save##Save", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
+            
+			// Filename input field
+			ImGui::Text("Filename:");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Filename:").x - 23.0f);
+            ImGui::InputText("##SaveFilename", savefilename, sizeof(savefilename));
+
+			// Save Button
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Save").x - ImGui::CalcTextSize("Cancel").x - 30.0f);
+            if (ImGui::Button("Save##SaveSave")) {
+				
+				std::string filename(savefilename);
+				filename = trim(filename);
+				if (filename == "") {filename = timestamp() + ".png";}
+
+				if (validate(filename)) {
+					unsigned char* data = (unsigned char*) malloc(Window::getWidth() * Window::getHeight() * 3);
+					colorbuffer->bind();
+					glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
+					colorbuffer->unbind();
+					stbi_flip_vertically_on_write(1);
+					stbi_write_png(filename.c_str(), Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
+					savewindow = false;
+					free(data);
+				}
+
+            }
+
+			// Cancel Button
+			ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Cancel").x - 15.0f); // Adjust 20.0f as needed
+            if (ImGui::Button("Cancel##SaveCancel")) {
+                savewindow = false;
+            }
+
+			ImGui::End();
+
+		}
+
 		ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
@@ -425,16 +505,6 @@ int main() {
 		fps = 1.0f / dt;
 
 	}
-
-	// For now just to test, we will save the save buffer on close.
-	// TODO: create a save event to call these lines of code.
-	unsigned char* data = (unsigned char*) malloc(w * h * 3);
-	colorbuffer->bind();
-	glReadPixels(0, 0, Window::getWidth(), Window::getHeight(), GL_RGB, GL_UNSIGNED_BYTE, data);
-	colorbuffer->unbind();
-	stbi_flip_vertically_on_write(1);
-	stbi_write_png("test.png", Window::getWidth(), Window::getHeight(), 3, data, Window::getWidth() * 3);
-	free(data);
 
 	// Destroy the fractalbuffers.
 	delete fractalbuffer;
