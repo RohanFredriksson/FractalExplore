@@ -18,6 +18,7 @@ class Arbitrary {
         uint32_t* data();
 
         static int precision();
+        static std::string glsl();
         static double value(const Arbitrary n);
         static Arbitrary shift(const Arbitrary n, int p);
         static std::string serialise(const Arbitrary n);

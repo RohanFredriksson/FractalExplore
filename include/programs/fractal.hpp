@@ -24,8 +24,12 @@ class FractalProgram : public ShaderProgram {
             std::string v = this->vertex();
             std::string f = this->fragment();
 
-            std::string search = "${PRECISION}";
+            std::string search = "${ARBITRARY}";
             size_t position = f.find(search);
+            if (position != std::string::npos) {f.replace(position, search.length(), Arbitrary::glsl());}
+
+            search = "${PRECISION}";
+            position = f.find(search);
             if (position != std::string::npos) {f.replace(position, search.length(), std::to_string(this->precision+1));}
 
             this->program = new Shader(v, f);
