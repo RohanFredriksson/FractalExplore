@@ -293,14 +293,28 @@ int main() {
 
 			if (MouseListener::getScrollY() > 0) {
 				Camera::setDepth(Camera::getDepth() * Arbitrary(1.0 / 1.1));
-				Camera::setX(Camera::getX() + (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(0.0909090909f));
-				Camera::setY(Camera::getY() + (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(0.0909090909f));
+				Camera::setX(Camera::getX() + (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(1.0 / 11.0));
+				Camera::setY(Camera::getY() + (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(1.0 / 11.0));
 			} else {
 				Camera::setDepth(Camera::getDepth() * (Arbitrary(1.1)));
-				Camera::setX(Camera::getX() - (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(0.1f));
-				Camera::setY(Camera::getY() - (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(0.1f));
+				Camera::setX(Camera::getX() - (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(0.1));
+				Camera::setY(Camera::getY() - (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(0.1));
 			}
 
+			flag = true;
+		} 
+		
+		else if (KeyListener::isKeyDown(GLFW_KEY_EQUAL)) {
+			Camera::setDepth(Camera::getDepth() * Arbitrary(1.0 / 1.01));
+			Camera::setX(Camera::getX() + (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(1.0 / 99.0));
+			Camera::setY(Camera::getY() + (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(1.0 / 99.0));
+			flag = true;
+		}
+
+		else if (KeyListener::isKeyDown(GLFW_KEY_MINUS)) {
+			Camera::setDepth(Camera::getDepth() * (Arbitrary(1.01)));
+			Camera::setX(Camera::getX() - (MouseListener::getWorldX() - Camera::getX()) * Arbitrary(0.01));
+			Camera::setY(Camera::getY() - (MouseListener::getWorldY() - Camera::getY()) * Arbitrary(0.01));
 			flag = true;
 		}
 
